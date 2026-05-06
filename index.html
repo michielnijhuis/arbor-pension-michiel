@@ -65,6 +65,20 @@ body{background:var(--bg);color:var(--t2);font-family:var(--sans);min-height:100
 .chart-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
 @media(max-width:750px){.chart-row{grid-template-columns:1fr}}
 .chart-h220{height:220px;position:relative}
+.chart-h180{height:180px;position:relative}
+
+/* Hero block: big numbers + accent rule */
+.hero{background:linear-gradient(180deg, var(--s2) 0%, var(--s1) 100%);border:1px solid var(--b1);border-radius:10px;padding:24px 28px;margin-bottom:14px;display:grid;grid-template-columns:1fr 1px 1fr;gap:24px;align-items:center}
+@media(max-width:750px){.hero{grid-template-columns:1fr;gap:14px}.hero-divider{display:none}}
+.hero-block{display:flex;flex-direction:column;gap:4px}
+.hero-lbl{font-size:10px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.14em;color:var(--t3)}
+.hero-val{font-size:34px;font-weight:700;font-family:var(--mono);letter-spacing:-1.5px;line-height:1;color:var(--t1)}
+.hero-val.green{color:var(--green)}
+.hero-val.cyan{color:var(--cyan)}
+.hero-sub{font-size:11px;font-family:var(--mono);color:var(--t4);margin-top:4px}
+.hero-divider{width:1px;background:var(--b1);align-self:stretch}
+.hero-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:750px){.hero-row{grid-template-columns:1fr}}
 
 /* ── SDIV ── */
 .sdiv{font-size:9px;font-family:var(--mono);color:var(--t3);text-transform:uppercase;letter-spacing:.15em;margin:16px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--b1)}
@@ -254,9 +268,22 @@ body{background:var(--bg);color:var(--t2);font-family:var(--sans);min-height:100
 <!-- OVERVIEW -->
 <div class="tab-panel active" id="tab-overview">
 
-  <!-- BND SALDO SECTION -->
-  <div class="sdiv">BND Balance · invested pension capital</div>
-  <div class="kpi-grid" id="saldoKpis"></div>
+  <!-- HERO -->
+  <div class="hero" id="saldoHero"></div>
+
+  <!-- SCENARIO + ALLOCATION CHARTS -->
+  <div class="hero-row">
+    <div class="panel">
+      <div class="panel-hdr"><div class="panel-title">Projection scenarios at maturity</div></div>
+      <div class="panel-body"><div class="chart-h180"><canvas id="scenarioChart"></canvas></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-hdr"><div class="panel-title">Asset allocation</div></div>
+      <div class="panel-body"><div class="chart-h180"><canvas id="allocChart"></canvas></div></div>
+    </div>
+  </div>
+
+  <!-- BALANCE PER ACCOUNT TABLE -->
   <div class="panel" style="margin-bottom:14px">
     <div class="panel-hdr">
       <div class="panel-title">Balance per account · <span id="saldoLastDate">—</span></div>
@@ -264,6 +291,9 @@ body{background:var(--bg);color:var(--t2);font-family:var(--sans);min-height:100
     </div>
     <div class="panel-body" id="saldoTable"></div>
   </div>
+
+  <!-- KPI GRID (secondary) -->
+  <div class="kpi-grid" id="saldoKpis"></div>
 
 </div>
 
@@ -845,6 +875,100 @@ function switchTab(name){
 // ────────────────────────────────────────────────────────────────
 // SALDO RENDER
 // ────────────────────────────────────────────────────────────────
+function buildSaldoHero(){
+  const li = SALDO_DATA.dates.length - 1;
+  const total = saldoGrandTotal(li);
+  const verw = projectionTotal('all', 'verwacht');
+  const slecht = projectionTotal('all', 'slecht');
+  const goed = projectionTotal('all', 'goed');
+  const upliftPct = total > 0 ? Math.round((verw - total) / total * 100) : null;
+  const accCount = SALDO_CONFIG.length;
+  document.getElementById('saldoHero').innerHTML = `
+    <div class="hero-block">
+      <div class="hero-lbl">Current balance</div>
+      <div class="hero-val green">${fmtE(total)}</div>
+      <div class="hero-sub">${SALDO_DATA.dates[li] || ''} · ${accCount} ${accCount === 1 ? 'account' : 'accounts'} · BND</div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-block">
+      <div class="hero-lbl">Projected at maturity</div>
+      <div class="hero-val cyan">${fmtE(verw)}</div>
+      <div class="hero-sub">BND expected scenario · range ${fmtE(slecht)} – ${fmtE(goed)}${upliftPct != null ? ' · +'+upliftPct+'% vs today' : ''}</div>
+    </div>
+  `;
+}
+
+let _scenarioChart, _allocChart;
+function buildScenarioChart(){
+  const slecht = projectionTotal('all', 'slecht');
+  const verw = projectionTotal('all', 'verwacht');
+  const goed = projectionTotal('all', 'goed');
+  const ctx = document.getElementById('scenarioChart');
+  if(!ctx) return;
+  if(_scenarioChart) _scenarioChart.destroy();
+  _scenarioChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Bear', 'Expected', 'Bull'],
+      datasets: [{
+        data: [slecht, verw, goed],
+        backgroundColor: ['rgba(240,104,104,.7)', 'rgba(62,207,207,.7)', 'rgba(45,212,160,.7)'],
+        borderColor: ['#f06868', '#3ecfcf', '#2dd4a0'],
+        borderWidth: 1,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0a1c36', borderColor: '#1a3050', borderWidth: 1,
+          callbacks: { label: ctx => ' ' + fmtE(ctx.raw) }
+        },
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#abb5c8', font: { size: 11 } } },
+        y: { grid: { color: '#1a3050' }, ticks: { color: '#7d96b0', font: { size: 9 }, callback: v => '€' + (v/1000).toFixed(0) + 'k' } },
+      }
+    }
+  });
+}
+
+function buildAllocChart(){
+  // Aggregate by fund-type across all IBANs (Aandelen vs Obligaties)
+  const byType = {};
+  SALDO_CONFIG.forEach(c => {
+    (SALDO_FUNDS[c.iban] || []).forEach(f => {
+      byType[f.type] = (byType[f.type] || 0) + (f.waarde || 0);
+    });
+  });
+  const labels = Object.keys(byType);
+  const values = labels.map(k => byType[k]);
+  const total = values.reduce((a, b) => a + b, 0);
+  const colors = labels.map(k => k === 'Aandelen' ? '#4d9ef8' : (k === 'Obligaties' ? '#3ecfcf' : '#9b7ff4'));
+  const ctx = document.getElementById('allocChart');
+  if(!ctx) return;
+  if(_allocChart) _allocChart.destroy();
+  _allocChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: values, backgroundColor: colors, borderColor: '#020c1a', borderWidth: 2 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: { position: 'right', labels: { color: '#abb5c8', font: { size: 11 }, padding: 12, boxWidth: 10 } },
+        tooltip: {
+          backgroundColor: '#0a1c36', borderColor: '#1a3050', borderWidth: 1,
+          callbacks: {
+            label: ctx => ` ${ctx.label}: ${fmtE(ctx.raw)} · ${total ? Math.round(ctx.raw/total*100) : 0}%`
+          }
+        }
+      }
+    }
+  });
+}
+
 function buildSaldoKpis(){
   const li = SALDO_DATA.dates.length - 1;
   const totalNow = saldoGrandTotal(li);
@@ -1024,6 +1148,9 @@ function exportPensionPDF(){
 // INIT
 // ────────────────────────────────────────────────────────────────
 loadSaldo();
+buildSaldoHero();
+buildScenarioChart();
+buildAllocChart();
 buildSaldoKpis();
 buildSaldoTable();
 buildStatusBar();
