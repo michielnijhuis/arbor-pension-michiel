@@ -242,7 +242,6 @@ body{background:var(--bg);color:var(--t2);font-family:var(--sans);min-height:100
       <div class="title-sub">M.F.E. Nijhuis · Brand New Day · BND saldo + jaarruimte</div>
     </div>
   </div>
-  <div class="status-bar" id="statusBar"></div>
   <div class="tabs-row">
     <button class="tab-btn active" id="tab-btn-overview" onclick="switchTab('overview')">Saldo</button>
     <button class="tab-btn" id="tab-btn-mn" onclick="switchTab('mn')">Jaarruimte log</button>
@@ -270,6 +269,7 @@ body{background:var(--bg);color:var(--t2);font-family:var(--sans);min-height:100
 
 <!-- JAARRUIMTE (fiscaal) -->
 <div class="tab-panel" id="tab-jaar">
+  <div class="status-bar" id="statusBar" style="margin-bottom:14px"></div>
   <div class="sdiv">Jaarruimte · contribution room overview</div>
   <div class="kpi-grid" id="ovKpis"></div>
   <div class="chart-row">
