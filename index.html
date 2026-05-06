@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nijhuis · Pension · Michiel</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@1.5.8/dist/html2canvas-pro.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#020c1a;--s1:#071428;--s2:#0a1c36;--s3:#0f2444;
+  --b1:#1a3050;--b2:#243d63;--b3:#2e4f7a;
+  --t1:#e8f0f8;--t2:#8aa8c8;--t3:#4a6880;--t4:#2a4060;
+  --blue:#4d9ef8;--green:#2dd4a0;--amber:#f4b942;--red:#f06868;
+  --violet:#9b7ff4;--cyan:#3ecfcf;--orange:#fb923c;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+}
+body{background:var(--bg);color:var(--t2);font-family:var(--sans);min-height:100vh}
+
+/* ── HEADER ── */
+.hdr{background:linear-gradient(180deg,#030f20 0%,#071428 100%);border-bottom:1px solid var(--b1);padding:16px 28px 0}
+.hdr-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.brand{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--t3);text-transform:uppercase;margin-bottom:2px}
+.title{font-size:18px;font-weight:700;color:var(--t1);letter-spacing:-.3px}
+.title-sub{font-size:10px;color:var(--t3);font-family:var(--mono);margin-top:2px}
+.hdr-kpis{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+.hkpi{text-align:right}
+.hkpi-lbl{font-size:9px;font-family:var(--mono);color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px}
+.hkpi-val{font-size:18px;font-weight:600;font-family:var(--mono);letter-spacing:-.8px;line-height:1;color:var(--t1)}
+.hkpi-sub{font-size:9px;color:var(--t3);font-family:var(--mono);margin-top:1px}
+
+/* ── TABS ── */
+.tabs-row{display:flex;gap:2px}
+.tab-btn{padding:8px 20px;border-radius:6px 6px 0 0;border:1px solid var(--b1);border-bottom:none;background:transparent;color:var(--t3);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all .15s;letter-spacing:.02em;display:flex;align-items:center;gap:6px}
+.tab-btn.active{background:var(--bg);color:var(--t1)}
+.tab-btn:hover:not(.active){color:var(--t2)}
+
+/* ── CONTENT ── */
+.content{padding:20px 28px}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* ── PANELS ── */
+.panel{background:var(--s1);border:1px solid var(--b1);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.panel-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--b1)}
+.panel-title{font-size:10px;font-family:var(--mono);font-weight:500;color:var(--t3);letter-spacing:.1em;text-transform:uppercase}
+.panel-body{padding:16px}
+
+/* ── PERSON BADGE ── */
+.person-badge{padding:3px 10px;border-radius:4px;font-size:10px;font-family:var(--mono);font-weight:600;letter-spacing:.06em}
+.mn-badge{background:rgba(77,158,248,.12);color:var(--blue);border:1px solid rgba(77,158,248,.3)}
+.as-badge{background:rgba(155,127,244,.12);color:var(--violet);border:1px solid rgba(155,127,244,.3)}
+
+/* ── OVERVIEW KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.kpi-card{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:12px 14px}
+.kpi-lbl{font-size:9px;font-family:var(--mono);color:var(--t3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.kpi-val{font-size:18px;font-weight:600;font-family:var(--mono);letter-spacing:-.8px;color:var(--t1);line-height:1}
+.kpi-sub{font-size:10px;color:var(--t3);margin-top:3px}
+
+/* ── CHART ROW ── */
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:750px){.chart-row{grid-template-columns:1fr}}
+.chart-h220{height:220px;position:relative}
+
+/* ── SDIV ── */
+.sdiv{font-size:9px;font-family:var(--mono);color:var(--t3);text-transform:uppercase;letter-spacing:.15em;margin:16px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--b1)}
+
+/* ── PERSON SECTION HEADER ── */
+.psh{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--b1)}
+.psh-name{font-size:15px;font-weight:600;color:var(--t1)}
+.psh-meta{font-size:11px;color:var(--t3);font-family:var(--mono)}
+
+/* ── YEAR ACCORDION ── */
+.yr-block{background:var(--s1);border:1px solid var(--b1);border-radius:8px;margin-bottom:6px;overflow:hidden;transition:border-color .15s}
+.yr-block.open{border-color:var(--b2)}
+.yr-block:hover{border-color:var(--b2)}
+
+.yr-hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none}
+.yr-hdr:hover{background:rgba(255,255,255,.01)}
+.yh-year{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--t1);min-width:50px;letter-spacing:-.5px}
+.yh-year small{display:block;font-size:9px;color:var(--t3);font-weight:400;letter-spacing:0}
+
+/* mini KPI row in header */
+.yh-stats{display:flex;gap:0;flex:1;overflow:hidden}
+.yh-stat{flex:1;text-align:center;padding:0 6px;border-right:1px solid var(--b1);min-width:0}
+.yh-stat:last-child{border-right:none}
+.yh-stat-lbl{font-size:8px;font-family:var(--mono);color:var(--t3);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yh-stat-val{font-size:11px;font-family:var(--mono);font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* usage bar in header */
+.yh-usage{min-width:120px;text-align:right}
+.usage-bar-wrap{background:var(--b1);border-radius:2px;height:4px;margin-top:4px;width:100%}
+.usage-bar{height:4px;border-radius:2px;transition:width .3s}
+.usage-pct{font-size:9px;font-family:var(--mono);color:var(--t3)}
+
+.yh-chevron{color:var(--t4);font-size:12px;transition:transform .2s;flex-shrink:0}
+.yr-block.open .yh-chevron{transform:rotate(180deg)}
+
+/* ── YEAR BODY ── */
+.yr-body{display:none;border-top:1px solid var(--b1)}
+.yr-block.open .yr-body{display:block}
+
+/* calc breakdown */
+.calc-row{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:12px 14px;background:rgba(0,0,0,.1);border-bottom:1px solid var(--b1)}
+@media(max-width:800px){.calc-row{grid-template-columns:repeat(3,1fr)}}
+.calc-item{}
+.calc-lbl{font-size:8px;font-family:var(--mono);color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.calc-val{font-size:13px;font-weight:600;font-family:var(--mono);color:var(--t1)}
+.calc-val.highlight{color:var(--cyan)}
+.calc-val.green{color:var(--green)}
+.calc-val.amber{color:var(--amber)}
+.calc-val.dim{color:var(--t3)}
+
+/* dotation log */
+.dot-section{padding:12px 14px}
+.dot-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.dot-title{font-size:10px;font-family:var(--mono);color:var(--t3);text-transform:uppercase;letter-spacing:.1em}
+.dot-total{font-size:12px;font-family:var(--mono);font-weight:600}
+
+.dot-list{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.dot-entry{display:grid;grid-template-columns:120px 110px 1fr auto;gap:8px;align-items:center;background:var(--s2);border:1px solid var(--b1);border-radius:5px;padding:7px 10px}
+.dot-entry-view{display:contents}
+.dot-entry-edit{display:none;grid-column:1/-1;grid-template-columns:120px 110px 1fr auto;gap:8px;align-items:center}
+.dot-entry.editing .dot-entry-view{display:none}
+.dot-entry.editing .dot-entry-edit{display:grid}
+
+.de-date{font-family:var(--mono);font-size:11px;color:var(--t2)}
+.de-amt{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--green)}
+.de-note{font-size:10px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.de-actions{display:flex;gap:4px;justify-content:flex-end;flex-shrink:0}
+
+.btn-icon{background:transparent;border:1px solid var(--b1);border-radius:4px;color:var(--t4);font-size:10px;cursor:pointer;padding:3px 7px;font-family:var(--mono);transition:all .15s}
+.btn-icon:hover{color:var(--t2);border-color:var(--b2)}
+.btn-icon.danger:hover{color:var(--red);border-color:rgba(240,104,104,.3)}
+
+.field-input{background:var(--s1);border:1px solid var(--b1);border-radius:4px;padding:5px 8px;font-size:11px;font-family:var(--mono);color:var(--t1);outline:none;width:100%}
+.field-input:focus{border-color:rgba(77,158,248,.5)}
+.btn-xs{padding:4px 10px;border-radius:4px;font-size:10px;font-family:var(--mono);cursor:pointer;border:1px solid;transition:all .15s;font-weight:600}
+.btn-save{background:rgba(45,212,160,.1);color:var(--green);border-color:rgba(45,212,160,.3)}
+.btn-save:hover{background:rgba(45,212,160,.18)}
+.btn-cancel{background:transparent;color:var(--t3);border-color:var(--b1)}
+
+.btn-add-dot{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:5px;border:1px dashed var(--b2);background:transparent;color:var(--t3);font-size:10px;font-family:var(--mono);cursor:pointer;transition:all .15s;width:100%}
+.btn-add-dot:hover{color:var(--t2);border-color:var(--b3)}
+
+.dot-empty{font-size:11px;color:var(--t4);font-style:italic;padding:8px 0}
+
+/* over/under indicator */
+.diff-line{margin-top:8px;font-size:10px;font-family:var(--mono);padding:5px 8px;border-radius:4px;display:inline-block}
+.diff-ok{background:rgba(45,212,160,.07);color:var(--green);border:1px solid rgba(45,212,160,.2)}
+.diff-over{background:rgba(240,104,104,.07);color:var(--red);border:1px solid rgba(240,104,104,.2)}
+.diff-under{background:rgba(244,185,66,.06);color:var(--amber);border:1px solid rgba(244,185,66,.18)}
+.diff-none{background:rgba(255,255,255,.02);color:var(--t3);border:1px solid var(--b1)}
+
+/* note row */
+.yr-note-wrap{padding:0 14px 12px}
+.yr-note-input{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:4px;padding:6px 10px;font-size:11px;font-family:var(--mono);color:var(--t1);outline:none;resize:vertical;min-height:44px}
+.yr-note-input:focus{outline:1px solid rgba(77,158,248,.3)}
+
+/* ── OVERVIEW TABLE ── */
+.ov-scroll{overflow-x:auto}
+.jr-table{width:100%;border-collapse:collapse;font-size:11px;min-width:800px}
+.jr-table th{padding:8px 12px;font-size:9px;font-family:var(--mono);font-weight:500;color:var(--t3);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--b1);text-align:left;white-space:nowrap;background:var(--s1)}
+.jr-table th.r{text-align:right}
+.jr-table td{padding:7px 12px;border-bottom:1px solid rgba(26,48,80,.3);font-family:var(--mono);font-size:11px;color:var(--t2);white-space:nowrap}
+.jr-table tr:hover td{background:rgba(255,255,255,.008)}
+.jr-table td.r{text-align:right}
+.jr-table td.hi{color:var(--t1);font-weight:600}
+.jr-table td.green{color:var(--green)}
+.jr-table td.amber{color:var(--amber)}
+.jr-table td.red{color:var(--red)}
+.jr-table td.dim{color:var(--t4)}
+.jr-table tr.totals td{background:rgba(26,48,80,.2);color:var(--t1);font-weight:600;border-top:1px solid var(--b2)}
+.bar-cell{min-width:80px}
+.jr-bar-wrap{background:var(--b1);border-radius:2px;height:4px;width:100%}
+.jr-bar{height:4px;border-radius:2px}
+
+/* info box */
+.info-box{background:rgba(77,158,248,.04);border:1px solid rgba(77,158,248,.15);border-radius:6px;padding:10px 14px;font-size:10px;color:var(--t3);line-height:1.7;margin-top:4px}
+.info-box strong{color:var(--cyan);font-family:var(--mono)}
+
+/* ── STATUS BAR ── */
+.status-bar{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:9px 14px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sb-person{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sb-lbl{font-size:9px;font-family:var(--mono);color:var(--t3);text-transform:uppercase;letter-spacing:.12em;white-space:nowrap}
+.sb-pills{display:flex;gap:3px;flex-wrap:wrap}
+.sb-divider{width:1px;background:var(--b1);align-self:stretch;margin:0 2px}
+.yr-pill{display:inline-flex;flex-direction:column;align-items:center;padding:4px 7px;border-radius:5px;border:1px solid;cursor:pointer;transition:all .15s;min-width:42px;user-select:none}
+.yr-pill:hover{transform:translateY(-1px)}
+.yr-pill .yp-yr{font-size:10px;font-family:var(--mono);font-weight:600;line-height:1;margin-bottom:2px}
+.yr-pill .yp-dot{width:5px;height:5px;border-radius:50%;margin:1px auto}
+.yr-pill .yp-lbl{font-size:7px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.04em;margin-top:1px;line-height:1}
+/* states */
+.yp-full{background:rgba(45,212,160,.07);border-color:rgba(45,212,160,.25)!important;color:var(--green)}
+.yp-full .yp-dot{background:var(--green)}.yp-full .yp-lbl{color:var(--t4)}
+.yp-over{background:rgba(240,104,104,.07);border-color:rgba(240,104,104,.25)!important;color:var(--red)}
+.yp-over .yp-dot{background:var(--red)}.yp-over .yp-lbl{color:var(--red)}
+.yp-partial{background:rgba(244,185,66,.07);border-color:rgba(244,185,66,.25)!important;color:var(--amber)}
+.yp-partial .yp-dot{background:var(--amber)}.yp-partial .yp-lbl{color:var(--amber)}
+.yp-missed{background:rgba(240,104,104,.05);border-color:rgba(240,104,104,.2)!important;color:var(--red)}
+.yp-missed .yp-dot{background:var(--red)}.yp-missed .yp-lbl{color:var(--red)}
+.yp-none{background:rgba(255,255,255,.02);border-color:var(--b1)!important;color:var(--t4)}
+.yp-none .yp-dot{background:var(--t4)}.yp-none .yp-lbl{color:var(--t4)}
+.yp-future{background:rgba(77,158,248,.05);border-color:rgba(77,158,248,.2)!important;color:var(--blue)}
+.yp-future .yp-dot{background:var(--blue)}.yp-future .yp-lbl{color:var(--t4)}
+.sb-totals{display:flex;gap:16px;margin-left:auto;flex-wrap:wrap;align-items:center}
+.sb-tot{text-align:right}
+.sb-tot-lbl{font-size:8px;font-family:var(--mono);color:var(--t3);text-transform:uppercase;letter-spacing:.1em}
+.sb-tot-val{font-size:13px;font-weight:600;font-family:var(--mono);letter-spacing:-.5px}
+</style>
+</head>
+<body>
+
+<button id="exportPdfBtn" onclick="exportPensionPDF()" title="Download PDF" style="position:fixed;top:12px;right:12px;z-index:60;padding:6px 13px;border-radius:6px;border:1px solid var(--b1, #1a3050);background:rgba(255,255,255,.04);color:var(--t2, #8aa8c8);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--sans, sans-serif);backdrop-filter:blur(4px);transition:all .15s">⇩ Export PDF</button>
+
+<!-- SALDO EDITOR MODAL -->
+<div id="saldoEditorOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto" onclick="if(event.target.id==='saldoEditorOverlay')closeSaldoEditor()">
+  <div style="background:var(--s1, #071428);border:1px solid var(--b2, #243d63);border-radius:10px;padding:22px;max-width:480px;width:100%;margin:auto">
+    <div style="font-size:14px;font-weight:700;color:var(--t1, #e8f0f8);margin-bottom:14px">Update BND saldi</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--b1);margin-bottom:8px">
+      <div style="font-size:11px;color:var(--t2)">Datum van deze update <small style="display:block;font-size:9px;color:var(--t4)">bv. "May '26" of "31 May 2026"</small></div>
+      <input id="saldoEditorDate" style="width:130px;padding:5px 8px;text-align:right;background:var(--s2);border:1px solid var(--b1);border-radius:5px;color:var(--t1);font-family:var(--mono);font-size:12px">
+    </div>
+    <div id="saldoEditorFields"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;padding-top:14px;border-top:1px solid var(--b1)">
+      <button onclick="closeSaldoEditor()" style="padding:7px 14px;border-radius:6px;border:1px solid var(--b1);background:transparent;color:var(--t3);font-size:12px;cursor:pointer">Cancel</button>
+      <button onclick="saveSaldoEditor()" style="padding:7px 18px;border-radius:6px;border:1px solid var(--blue, #4d9ef8);background:rgba(77,158,248,.1);color:var(--blue, #4d9ef8);font-size:12px;font-weight:600;cursor:pointer">Save</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="hdr">
+  <div class="hdr-top">
+    <div>
+      <div class="brand">Nijhuis Finance</div>
+      <div class="title">Pension · Michiel</div>
+      <div class="title-sub">M.F.E. Nijhuis · Brand New Day · BND saldo + jaarruimte</div>
+    </div>
+  </div>
+  <div class="status-bar" id="statusBar"></div>
+  <div class="tabs-row">
+    <button class="tab-btn active" id="tab-btn-overview" onclick="switchTab('overview')">Saldo</button>
+    <button class="tab-btn" id="tab-btn-mn" onclick="switchTab('mn')">Jaarruimte log</button>
+    <button class="tab-btn" id="tab-btn-jaar" onclick="switchTab('jaar')">Jaarruimte (fiscaal)</button>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- OVERVIEW -->
+<div class="tab-panel active" id="tab-overview">
+
+  <!-- BND SALDO SECTION -->
+  <div class="sdiv">BND Saldo · belegd vermogen pensioenrekeningen</div>
+  <div class="kpi-grid" id="saldoKpis"></div>
+  <div class="panel" style="margin-bottom:14px">
+    <div class="panel-hdr">
+      <div class="panel-title">Saldo per rekening · <span id="saldoLastDate">—</span></div>
+      <button class="ctrl-btn primary" onclick="openSaldoEditor()" style="font-size:11px;padding:4px 10px">+ Update saldi</button>
+    </div>
+    <div class="panel-body" id="saldoTable"></div>
+  </div>
+
+</div>
+
+<!-- JAARRUIMTE (fiscaal) -->
+<div class="tab-panel" id="tab-jaar">
+  <div class="sdiv">Jaarruimte · contribution room overview</div>
+  <div class="kpi-grid" id="ovKpis"></div>
+  <div class="chart-row">
+    <div class="panel">
+      <div class="panel-hdr">
+        <div class="panel-title">MN · Jaarruimte vs BND Contributions</div>
+      </div>
+      <div class="panel-body"><div class="chart-h220"><canvas id="mnChart"></canvas></div></div>
+    </div>
+  </div>
+
+  <div class="sdiv">MN · Jaarruimte log 2014–2025</div>
+  <div class="panel">
+    <div class="ov-scroll">
+      <table class="jr-table"><thead><tr>
+        <th>Opbouw</th><th>Dotatie jr</th><th class="r">Taxable income</th>
+        <th class="r">AOW franchise</th><th class="r">Premiegrondslag</th>
+        <th class="r">Jaarruimte</th><th class="r">Reserv.ruimte</th>
+        <th class="r">Available</th><th class="r">BND total</th>
+        <th class="r">Remaining</th><th>Usage</th><th>Note</th>
+      </tr></thead>
+      <tbody id="mnTableBody"></tbody>
+    </table></div>
+  </div>
+
+  <div class="info-box">
+    <strong>How jaarruimte works:</strong> Annual contribution room is based on prior year taxable income minus AOW franchise, multiplied by the applicable rate (13.3% post-2023). Unused room accumulates as reserveringsruimte for up to 10 years. MN 2024 had unusually high jaarruimte (€35,798) due to €405K taxable income including deferred Roamler proceeds.
+  </div>
+</div>
+
+<!-- MICHIEL -->
+<div class="tab-panel" id="tab-mn">
+  <div class="psh">
+    <span class="person-badge mn-badge">MN</span>
+    <div>
+      <div class="psh-name">Michiel Nijhuis · Brand New Day</div>
+      <div class="psh-meta">Click year to expand · log individual BND dotations per year</div>
+    </div>
+  </div>
+  <div id="mnBlocks"></div>
+</div>
+
+
+</div><!-- /content -->
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// BND SALDO CONFIG + DATA
+// ════════════════════════════════════════════════════════════════
+const SALDO_CONFIG = [
+  { iban: 'NL69BNDA0100009224', holder: 'Michiel', label: 'Pensioenrekening (hoofd)',     person: 'mn', color: '#4d9ef8' },
+  { iban: 'NL73BNDA0100009152', holder: 'Michiel', label: 'Pensioenrekening (secundair)', person: 'mn', color: '#3ecfcf' },
+];
+
+// Verwachte markt projection per IBAN at retirement (BND)
+const SALDO_PROJECTION = {
+  'NL69BNDA0100009224': { slecht: 392764, verwacht: 831187, goed: 1457740 },
+  'NL73BNDA0100009152': { slecht: 102424, verwacht: 238883, goed:  437695 },
+};
+
+// Initial saldo timeseries (May '26 baseline from BND PDFs of 06-05-2026)
+const SALDO_DEFAULT_DATA = {
+  dates: ["May '26"],
+  saldi: {
+    'NL69BNDA0100009224': [365812],
+    'NL73BNDA0100009152': [131396],
+  },
+};
+
+// Fund-level breakdown per IBAN as of latest BND statement (May '26)
+const SALDO_FUNDS = {
+  'NL69BNDA0100009224': [
+    { fund: 'BND Wereld Indexfonds Hedged',     type: 'Aandelen',   aantal: 7557.70, koers: 39.36, waarde: 297456 },
+    { fund: 'BND Euro Staatsobligatie Indexfonds', type: 'Obligaties', aantal: 5840.79, koers: 11.70, waarde: 68356 },
+  ],
+  'NL73BNDA0100009152': [
+    { fund: 'BND Wereld Indexfonds Hedged',     type: 'Aandelen',   aantal: 2351.23, koers: 39.36, waarde: 92540 },
+    { fund: 'BND Euro Staatsobligatie Indexfonds', type: 'Obligaties', aantal: 3320.12, koers: 11.70, waarde: 38856 },
+  ],
+};
+const FUND_COLORS = {
+  'Aandelen':   '#4d9ef8',
+  'Obligaties': '#3ecfcf',
+};
+
+let SALDO_DATA;
+function loadSaldo(){
+  try { const s = localStorage.getItem('pension_saldo_v1'); if(s){ SALDO_DATA = JSON.parse(s); return; } } catch(e){}
+  SALDO_DATA = JSON.parse(JSON.stringify(SALDO_DEFAULT_DATA));
+}
+function persistSaldo(){
+  try { localStorage.setItem('pension_saldo_v1', JSON.stringify(SALDO_DATA)); } catch(e){}
+}
+
+function saldoTotalForPerson(person, idx){
+  const i = idx ?? SALDO_DATA.dates.length - 1;
+  return SALDO_CONFIG.filter(c => c.person === person).reduce((s, c) =>
+    s + (SALDO_DATA.saldi[c.iban]?.[i] || 0), 0);
+}
+function saldoGrandTotal(idx){
+  const i = idx ?? SALDO_DATA.dates.length - 1;
+  return SALDO_CONFIG.reduce((s, c) => s + (SALDO_DATA.saldi[c.iban]?.[i] || 0), 0);
+}
+function projectionTotal(person, scenario){
+  return SALDO_CONFIG.filter(c => person === 'all' || c.person === person)
+    .reduce((s, c) => s + (SALDO_PROJECTION[c.iban]?.[scenario] || 0), 0);
+}
+
+// ────────────────────────────────────────────────────────────────
+// BASE DATA (from xlsx)
+// ────────────────────────────────────────────────────────────────
+const MN_BASE = [
+  {year:2025, dotYear:2026, income:null,   franchise:19172, grondslag:null,   jr:null,    reserv:0,    note:'Income not yet known'},
+  {year:2024, dotYear:2025, income:405426, franchise:18475, grondslag:386951, jr:35798,   reserv:0,    note:'Unusually high — €405K income incl. deferred Roamler proceeds'},
+  {year:2023, dotYear:2024, income:60000,  franchise:17545, grondslag:42455,  jr:12737,   reserv:0,    note:''},
+  {year:2022, dotYear:2023, income:60000,  franchise:13646, grondslag:46354,  jr:13906,   reserv:2884, note:''},
+  {year:2021, dotYear:2022, income:60000,  franchise:12837, grondslag:47163,  jr:6273,    reserv:0,    note:'Invested slightly over jaarruimte'},
+  {year:2020, dotYear:2021, income:36333,  franchise:12672, grondslag:23661,  jr:3147,    reserv:0,    note:'Nothing contributed (only UWV income)'},
+  {year:2019, dotYear:2020, income:152479, franchise:12472, grondslag:140007, jr:12986,   reserv:0,    note:''},
+  {year:2018, dotYear:2019, income:315908, franchise:12275, grondslag:303633, jr:12678,   reserv:0,    note:''},
+  {year:2017, dotYear:2018, income:213167, franchise:12129, grondslag:201038, jr:12362,   reserv:5627, note:''},
+  {year:2016, dotYear:2017, income:320429, franchise:12032, grondslag:308397, jr:12598,   reserv:7110, note:''},
+  {year:2015, dotYear:2016, income:298814, franchise:11996, grondslag:286818, jr:12355,   reserv:7088, note:''},
+  {year:2014, dotYear:2015, income:156975, franchise:11936, grondslag:145039, jr:12153,   reserv:7052, note:''},
+];
+
+const AS_BASE = [];
+const AS_BASE_REMOVED_DATA = [
+  {year:2018, dotYear:2019, income:46812, franchise:12275, grondslag:34537, jr:4594, reserv:0, note:''},
+  {year:2017, dotYear:2018, income:52375, franchise:12129, grondslag:40246, jr:5353, reserv:0, note:''},
+  {year:2016, dotYear:2017, income:68459, franchise:12032, grondslag:56427, jr:7787, reserv:0, note:''},
+  {year:2015, dotYear:2016, income:45497, franchise:11996, grondslag:33501, jr:4624, reserv:0, note:''},
+  {year:2014, dotYear:2015, income:20243, franchise:11936, grondslag:8307,  jr:1146, reserv:0, note:''},
+];
+
+// Default dotations — individual transfers as recorded in xlsx cell comments
+const MN_DEFAULT_DOTS = {
+  2025: [{id:'d1',date:'9 Feb 2026',  amt:7000,  note:'ING → BND'}],
+  2024: [
+    {id:'d1',date:'22 Jan 2025', amt:10000, note:'ING → BND'},
+    {id:'d2',date:'17 Mar 2025', amt:7000,  note:'ING → BND'},
+    {id:'d3',date:'24 Jun 2025', amt:7000,  note:'ING → BND'},
+    {id:'d4',date:'11 Sep 2025', amt:10000, note:'ING → BND'},
+    {id:'d5',date:'3 Dec 2025',  amt:1798,  note:'ING → BND (final top-up)'},
+  ],
+  2023: [{id:'d1',date:'6 Dec 2024',  amt:12737, note:'ING → BND'}],
+  2022: [{id:'d1',date:'Nov 2023',    amt:16791, note:'ING → BND (Nov 29/30)'}],
+  2021: [{id:'d1',date:'2 Dec 2022',  amt:6536,  note:'SNS → BND'}],
+  2020: [],
+  2019: [{id:'d1',date:'14 Dec 2020', amt:12986, note:'ING → BND'}],
+  2018: [{id:'d1',date:'18 Sep 2019', amt:12678, note:'SNS → BND'}],
+  2017: [{id:'d1',date:'31 Oct 2018', amt:17989, note:'SNS → BND'}],
+  2016: [{id:'d1',date:'20 Dec 2017', amt:19708, note:'SNS → BND'}],
+  2015: [{id:'d1',date:'5 Oct 2016',  amt:19205, note:'SNS → BND'},{id:'d2',date:'Oct 2016',amt:238,note:'Top-up to 19,443'}],
+  2014: [{id:'d1',date:'24 Nov 2015', amt:19205, note:'SNS → BND'}],
+};
+const AS_DEFAULT_DOTS_REMOVED = {
+  2018: [{id:'d1',date:'23 Dec 2019', amt:4594, note:'ING Nijhuis-Sedlov → BND'}],
+  2017: [{id:'d1',date:'31 Oct 2018', amt:5353, note:'ING → BND'}],
+  2016: [{id:'d1',date:'22 Dec 2017', amt:7787, note:'ING → BND'}],
+  2015: [{id:'d1',date:'5 Oct 2016',  amt:4623, note:'ING Nijhuis-Sedlov → BND'}],
+  2014: [{id:'d1',date:'2 Dec 2015',  amt:1147, note:'ING Nijhuis-Sedlov → BND'}],
+};
+
+// ────────────────────────────────────────────────────────────────
+// STATE
+// ────────────────────────────────────────────────────────────────
+function loadDots(key, defaults){
+  try{
+    const d = JSON.parse(localStorage.getItem(key));
+    return d || JSON.parse(JSON.stringify(defaults));
+  }catch(e){ return JSON.parse(JSON.stringify(defaults)); }
+}
+function saveDots(key, data){ try{ localStorage.setItem(key, JSON.stringify(data)); }catch(e){} }
+
+let MN_DOTS = loadDots('pension_mn_dots_v2', MN_DEFAULT_DOTS);
+let AS_DOTS = {};
+
+// Per-year notes
+function loadNotes(key){ try{ return JSON.parse(localStorage.getItem(key))||{}; }catch(e){return {};} }
+function saveNotes(key, data){ try{ localStorage.setItem(key, JSON.stringify(data)); }catch(e){} }
+let MN_NOTES = loadNotes('pension_mn_notes_v2');
+let AS_NOTES = {};
+
+// ────────────────────────────────────────────────────────────────
+// HELPERS
+// ────────────────────────────────────────────────────────────────
+const fmtE = (v, dash=true) => {
+  if(v===null||v===undefined||v==='') return dash?'—':'0';
+  const n = typeof v==='number'?v:parseFloat(v);
+  if(isNaN(n)) return dash?'—':'0';
+  if(n===0) return '€0';
+  return '€' + Math.round(Math.abs(n)).toLocaleString('nl-NL');
+};
+const pct = (used, avail) => (!avail||avail<=0) ? 0 : Math.min(120, Math.round(used/avail*100));
+
+function getDots(dotsObj, year){ return dotsObj[year] || []; }
+function sumDots(dotsObj, year){ return getDots(dotsObj, year).reduce((a,d)=>a+(parseFloat(d.amt)||0),0); }
+function nextId(arr){ return 'd'+(Date.now()); }
+
+// ────────────────────────────────────────────────────────────────
+// OVERVIEW TABLE
+// ────────────────────────────────────────────────────────────────
+function buildTable(base, dotsObj, tbodyId, showReserv){
+  const tbody = document.getElementById(tbodyId);
+  let totJr=0, totBnd=0;
+  let html = '';
+  base.forEach(r => {
+    if(!r.jr) return; // skip rows without jaarruimte (2025 future)
+    const avail = (r.jr||0) + (r.reserv||0);
+    const used  = sumDots(dotsObj, r.year);
+    const rem   = avail - used;
+    const p     = pct(used, avail);
+    const over  = used > avail + 10;
+    const barColor = over ? 'var(--red)' : used===0 ? 'var(--t4)' : 'var(--green)';
+    totJr  += r.jr||0;
+    totBnd += used;
+    const remCls = rem < -10 ? 'red' : rem > 50 ? 'amber' : 'green';
+
+    html += `<tr>
+      <td class="hi">${r.year}</td>
+      <td class="dim">${r.dotYear}</td>
+      <td class="r">${r.income?fmtE(r.income):'—'}</td>
+      <td class="r dim">${fmtE(r.franchise)}</td>
+      <td class="r">${r.grondslag?fmtE(r.grondslag):'—'}</td>
+      <td class="r green">${fmtE(r.jr)}</td>
+      ${showReserv?`<td class="r" style="color:var(--cyan)">${r.reserv&&r.reserv>0?'+'+fmtE(r.reserv):'—'}</td>`:''}
+      <td class="r hi">${fmtE(avail)}</td>
+      <td class="r" style="color:var(--green)">${used>0?fmtE(used):'—'}</td>
+      <td class="r ${remCls}">${used===0?'—':rem<-10?'<span style="color:var(--red)">over</span>':rem<50?'✓':''+fmtE(rem)}</td>
+      <td class="bar-cell">
+        <div style="font-size:9px;color:var(--t3);margin-bottom:2px">${used>0?p+'%':'—'}</div>
+        <div class="jr-bar-wrap"><div class="jr-bar" style="width:${Math.min(100,p)}%;background:${barColor}"></div></div>
+      </td>
+      ${showReserv?`<td style="font-size:9px;color:var(--t3);white-space:normal;max-width:180px">${r.note||''}</td>`:''}
+    </tr>`;
+  });
+  html += `<tr class="totals">
+    <td colspan="${showReserv?5:4}">TOTALS</td>
+    <td class="r">${fmtE(totJr)}</td>
+    ${showReserv?'<td>—</td>':''}
+    <td class="r">—</td>
+    <td class="r">${fmtE(totBnd)}</td>
+    <td class="r">—</td>
+    <td></td>
+    ${showReserv?'<td></td>':''}
+  </tr>`;
+  tbody.innerHTML = html;
+}
+
+// ────────────────────────────────────────────────────────────────
+// YEAR BLOCKS
+// ────────────────────────────────────────────────────────────────
+function buildBlocks(base, dotsObj, notesObj, containerId, person){
+  const el = document.getElementById(containerId);
+  // open future / current year by default
+
+  el.innerHTML = base.map((r, idx) => {
+    const avail = (r.jr||0) + (r.reserv||0);
+    const used  = sumDots(dotsObj, r.year);
+    const rem   = avail - used;
+    const p     = pct(used, avail);
+    const over  = used > avail + 10;
+
+
+    return `<div class="yr-block" id="${person}_blk_${r.year}">
+      <div class="yr-hdr" onclick="toggleBlock('${person}_blk_${r.year}')">
+        <div class="yh-year">${r.year}<small>dot. ${r.dotYear}</small></div>
+        <div class="yh-stats">
+          <div class="yh-stat"><div class="yh-stat-lbl">Income</div><div class="yh-stat-val">${r.income?fmtE(r.income):'TBD'}</div></div>
+          <div class="yh-stat"><div class="yh-stat-lbl">Jaarruimte</div><div class="yh-stat-val" style="color:var(--green)">${r.jr?fmtE(r.jr):'—'}</div></div>
+          ${r.reserv&&r.reserv>0?`<div class="yh-stat"><div class="yh-stat-lbl">+ Reserv.</div><div class="yh-stat-val" style="color:var(--cyan)">+${fmtE(r.reserv)}</div></div>`:''}
+          <div class="yh-stat"><div class="yh-stat-lbl">Available</div><div class="yh-stat-val">${avail>0?fmtE(avail):'—'}</div></div>
+          <div class="yh-stat"><div class="yh-stat-lbl">BND total</div><div class="yh-stat-val" style="color:var(--green)">${used>0?fmtE(used):'—'}</div></div>
+          <div class="yh-stat"><div class="yh-stat-lbl">Remaining</div><div class="yh-stat-val" style="color:${over?'var(--red)':rem>50?'var(--amber)':'var(--t3)'}">${avail>0?(over?'OVER':rem<50?'✓ full':fmtE(rem)):'—'}</div></div>
+        </div>
+        <div class="yh-usage">
+          <div class="usage-pct">${avail>0?p+'%':''}</div>
+          <div class="usage-bar-wrap">
+            <div class="usage-bar" style="width:${Math.min(100,p)}%;background:${over?'var(--red)':used===0?'var(--t4)':'var(--green)'}"></div>
+          </div>
+        </div>
+        <div class="yh-chevron">▼</div>
+      </div>
+      <div class="yr-body">
+        <div class="calc-row">
+          <div class="calc-item"><div class="calc-lbl">Taxable income</div><div class="calc-val">${r.income?fmtE(r.income):'TBD'}</div></div>
+          <div class="calc-item"><div class="calc-lbl">AOW franchise</div><div class="calc-val dim">− ${fmtE(r.franchise)}</div></div>
+          <div class="calc-item"><div class="calc-lbl">Premiegrondslag</div><div class="calc-val highlight">${r.grondslag?fmtE(r.grondslag):'TBD'}</div></div>
+          <div class="calc-item"><div class="calc-lbl">Jaarruimte</div><div class="calc-val green">${r.jr?fmtE(r.jr):'TBD'}</div></div>
+          <div class="calc-item"><div class="calc-lbl">Reserv.ruimte</div><div class="calc-val" style="color:var(--cyan)">${r.reserv&&r.reserv>0?'+'+fmtE(r.reserv):'—'}</div></div>
+          <div class="calc-item"><div class="calc-lbl">Max available</div><div class="calc-val hi">${avail>0?fmtE(avail):'TBD'}</div></div>
+        </div>
+        <div class="dot-section">
+          <div class="dot-hdr">
+            <div class="dot-title">BND Dotations</div>
+            <div class="dot-total" id="${person}_dottot_${r.year}" style="color:${over?'var(--red)':'var(--green)'}">
+              ${used>0?fmtE(used):'€0'} / ${avail>0?fmtE(avail):'?'}
+            </div>
+          </div>
+          <div class="dot-list" id="${person}_dotlist_${r.year}">
+            ${renderDotList(getDots(dotsObj, r.year), person, r.year)}
+          </div>
+          <div id="${person}_diffline_${r.year}">${renderDiffLine(used, avail)}</div>
+          <button class="btn-add-dot" onclick="addDot('${person}',${r.year})">+ Add dotation</button>
+        </div>
+        <div class="yr-note-wrap">
+          <div style="font-size:9px;font-family:var(--mono);color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Notes</div>
+          <textarea class="yr-note-input" id="${person}_note_${r.year}" onchange="saveYrNote('${person}',${r.year})" placeholder="Notes for this year…">${notesObj[r.year]||r.note||''}</textarea>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderDotList(dots, person, year){
+  if(!dots || dots.length===0) return `<div class="dot-empty">No dotations logged yet.</div>`;
+  return dots.map((d,i) => `
+    <div class="dot-entry" id="${person}_de_${year}_${d.id}">
+      <div class="dot-entry-view">
+        <div class="de-date">${d.date||'—'}</div>
+        <div class="de-amt">${fmtE(d.amt)}</div>
+        <div class="de-note">${d.note||''}</div>
+        <div class="de-actions">
+          <button class="btn-icon" onclick="editDot('${person}',${year},'${d.id}')">edit</button>
+          <button class="btn-icon danger" onclick="deleteDot('${person}',${year},'${d.id}')">×</button>
+        </div>
+      </div>
+      <div class="dot-entry-edit">
+        <input class="field-input" id="${person}_de_date_${year}_${d.id}" value="${d.date||''}" placeholder="Date">
+        <input class="field-input" type="number" id="${person}_de_amt_${year}_${d.id}" value="${d.amt||''}" placeholder="Amount €">
+        <input class="field-input" id="${person}_de_note_${year}_${d.id}" value="${d.note||''}" placeholder="Note (e.g. paid via iDEAL)">
+        <div style="display:flex;gap:4px">
+          <button class="btn-xs btn-save" onclick="saveDotEdit('${person}',${year},'${d.id}')">Save</button>
+          <button class="btn-xs btn-cancel" onclick="cancelDotEdit('${person}',${year},'${d.id}')">Cancel</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function renderDiffLine(used, avail){
+  if(!avail) return '';
+  const diff = avail - used;
+  if(used===0) return `<div class="diff-line diff-none">No contributions logged</div>`;
+  if(Math.abs(diff)<10) return `<div class="diff-line diff-ok">✓ Fully utilised</div>`;
+  if(diff < 0) return `<div class="diff-line diff-over">Over by ${fmtE(-diff)} — check contributions</div>`;
+  return `<div class="diff-line diff-under">${fmtE(diff)} remaining unused</div>`;
+}
+
+function toggleBlock(id){
+  document.getElementById(id)?.classList.toggle('open');
+}
+
+// ────────────────────────────────────────────────────────────────
+// DOT ACTIONS
+// ────────────────────────────────────────────────────────────────
+function getDotsObj(person){ return person==='mn'?MN_DOTS:AS_DOTS; }
+function getBase(person){ return person==='mn'?MN_BASE:AS_BASE; }
+function getNotesObj(person){ return person==='mn'?MN_NOTES:AS_NOTES; }
+function saveAll(person){ saveDots(person==='mn'?'pension_mn_dots_v2':'pension_as_dots_v2', getDotsObj(person)); }
+function saveAllNotes(person){ saveNotes(person==='mn'?'pension_mn_notes_v2':'pension_as_notes_v2', getNotesObj(person)); }
+
+function addDot(person, year){
+  const dotsObj = getDotsObj(person);
+  if(!dotsObj[year]) dotsObj[year] = [];
+  const id = nextId(dotsObj[year]||[]);
+  dotsObj[year].push({id, date:'', amt:'', note:''});
+  saveAll(person);
+  refreshDots(person, year);
+  // auto-open edit for new entry
+  setTimeout(()=>editDot(person, year, id), 50);
+}
+
+function editDot(person, year, id){
+  const el = document.getElementById(`${person}_de_${year}_${id}`);
+  if(el) el.classList.add('editing');
+}
+function cancelDotEdit(person, year, id){
+  // if empty, remove it
+  const dotsObj = getDotsObj(person);
+  const dots = dotsObj[year]||[];
+  const d = dots.find(x=>x.id===id);
+  if(d && !d.date && !d.amt){ deleteDotSilent(person, year, id); return; }
+  const el = document.getElementById(`${person}_de_${year}_${id}`);
+  if(el) el.classList.remove('editing');
+}
+function saveDotEdit(person, year, id){
+  const dotsObj = getDotsObj(person);
+  const dots = dotsObj[year]||[];
+  const d = dots.find(x=>x.id===id);
+  if(!d) return;
+  d.date = document.getElementById(`${person}_de_date_${year}_${id}`)?.value||'';
+  d.amt  = parseFloat(document.getElementById(`${person}_de_amt_${year}_${id}`)?.value)||0;
+  d.note = document.getElementById(`${person}_de_note_${year}_${id}`)?.value||'';
+  saveAll(person);
+  refreshDots(person, year);
+}
+function deleteDot(person, year, id){
+  if(!confirm('Remove this dotation?')) return;
+  deleteDotSilent(person, year, id);
+}
+function deleteDotSilent(person, year, id){
+  const dotsObj = getDotsObj(person);
+  dotsObj[year] = (dotsObj[year]||[]).filter(d=>d.id!==id);
+  saveAll(person);
+  refreshDots(person, year);
+}
+
+function saveYrNote(person, year){
+  const notesObj = getNotesObj(person);
+  const el = document.getElementById(`${person}_note_${year}`);
+  if(el){ notesObj[year] = el.value; saveAllNotes(person); }
+}
+
+function refreshDots(person, year){
+  const dotsObj = getDotsObj(person);
+  const base = getBase(person).find(r=>r.year===year);
+  const avail = base ? (base.jr||0)+(base.reserv||0) : 0;
+  const used = sumDots(dotsObj, year);
+
+  const listEl = document.getElementById(`${person}_dotlist_${year}`);
+  if(listEl) listEl.innerHTML = renderDotList(getDots(dotsObj,year), person, year);
+  const totEl = document.getElementById(`${person}_dottot_${year}`);
+  if(totEl){ totEl.textContent = `${fmtE(used)} / ${avail>0?fmtE(avail):'?'}`; totEl.style.color = used>avail+10?'var(--red)':'var(--green)'; }
+  const diffEl = document.getElementById(`${person}_diffline_${year}`);
+  if(diffEl) diffEl.innerHTML = renderDiffLine(used, avail);
+  // refresh header
+  const blk = document.getElementById(`${person}_blk_${year}`);
+  if(blk){
+    const p = pct(used, avail);
+    const bar = blk.querySelector('.usage-bar');
+    const barPct = blk.querySelector('.usage-pct');
+    if(bar){ bar.style.width=Math.min(100,p)+'%'; bar.style.background=used>avail+10?'var(--red)':used===0?'var(--t4)':'var(--green)'; }
+    if(barPct) barPct.textContent = avail>0?p+'%':'';
+  }
+  buildTable(MN_BASE, MN_DOTS, 'mnTableBody', true);
+// removed AS table
+  buildStatusBar();
+  rebuildCharts();
+}
+
+// ────────────────────────────────────────────────────────────────
+// CHARTS
+// ────────────────────────────────────────────────────────────────
+let charts = {};
+function rebuildCharts(){
+  buildPersonChart(MN_BASE, MN_DOTS, 'mnChart', '#4d9ef8', '#2dd4a0');
+// removed AS chart
+}
+function buildPersonChart(base, dotsObj, canvasId, jrColor, bndColor){
+  const rows = base.filter(r=>r.jr).slice().reverse();
+  const labels = rows.map(r=>String(r.year));
+  const jrVals = rows.map(r=>r.jr||0);
+  const bndVals = rows.map(r=>sumDots(dotsObj,r.year));
+  const G='rgba(26,48,80,.5)', TK='#4a6880';
+  if(charts[canvasId]) charts[canvasId].destroy();
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  charts[canvasId] = new Chart(canvas, {type:'bar',
+    data:{labels, datasets:[
+      {label:'Jaarruimte',data:jrVals,backgroundColor:jrColor+'40',borderColor:jrColor,borderWidth:1,borderRadius:2},
+      {label:'BND total',data:bndVals,backgroundColor:bndColor+'66',borderColor:bndColor,borderWidth:1,borderRadius:2},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,labels:{color:TK,font:{size:9,family:'IBM Plex Mono'},boxWidth:10,padding:10}},
+        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${fmtE(c.raw)}`}}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:TK,font:{size:9,family:'IBM Plex Mono'}}},
+        y:{grid:{color:G},ticks:{color:TK,font:{size:9,family:'IBM Plex Mono'},callback:v=>'€'+(v/1000).toFixed(0)+'K'}}
+      }
+    }
+  });
+}
+
+// ────────────────────────────────────────────────────────────────
+// STATUS BAR — year funding pills
+// ────────────────────────────────────────────────────────────────
+function pillState(r, dotsObj){
+  if(!r.jr) return 'future';         // no jaarruimte yet known
+  const avail = (r.jr||0)+(r.reserv||0);
+  const used  = sumDots(dotsObj, r.year);
+  if(used === 0 && avail > 0) return 'missed';
+  if(used > avail + 10) return 'over';
+  if(Math.abs(used - avail) <= 10) return 'full';
+  if(used > 0) return 'partial';
+  return 'none';
+}
+function pillLabel(state){ return {full:'Full',over:'Over',partial:'Part.',missed:'Missed',future:'TBD',none:'—'}[state]||''; }
+function pillCls(state){ return {full:'yp-full',over:'yp-over',partial:'yp-partial',missed:'yp-missed',future:'yp-future',none:'yp-none'}[state]||'yp-none'; }
+
+function buildStatusBar(){
+  const mnTotal = MN_BASE.reduce((a,r)=>a+sumDots(MN_DOTS,r.year),0);
+  const asTotal = AS_BASE.reduce((a,r)=>a+sumDots(AS_DOTS,r.year),0);
+  const mnMissed = MN_BASE.filter(r=>pillState(r,MN_DOTS)==='missed').length;
+  const mnPartial = MN_BASE.filter(r=>pillState(r,MN_DOTS)==='partial').length;
+
+  const mnPills = MN_BASE.map((r,i) => {
+    const st = pillState(r, MN_DOTS);
+    const cls = pillCls(st);
+    return `<div class="yr-pill ${cls}" onclick="switchTab('mn');setTimeout(()=>openBlock('mn_blk_${r.year}'),50)" title="${r.year}: ${pillLabel(st)}">
+      <div class="yp-yr">${r.year}</div>
+      <div class="yp-dot"></div>
+      <div class="yp-lbl">${pillLabel(st)}</div>
+    </div>`;
+  }).join('');
+
+  const asPills = AS_BASE.map((r,i) => {
+    const st = pillState(r, AS_DOTS);
+    const cls = pillCls(st);
+    return `<div class="yr-pill ${cls}" onclick="switchTab('as');setTimeout(()=>openBlock('as_blk_${r.year}'),50)" title="${r.year}: ${pillLabel(st)}">
+      <div class="yp-yr">${r.year}</div>
+      <div class="yp-dot"></div>
+      <div class="yp-lbl">${pillLabel(st)}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('statusBar').innerHTML = `
+    <div class="sb-person">
+      <span class="sb-lbl" style="color:var(--blue)">MN</span>
+      <div class="sb-pills">${mnPills}</div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-person">
+      <span class="sb-lbl" style="color:var(--violet)">AS</span>
+      <div class="sb-pills">${asPills}</div>
+    </div>
+    <div class="sb-totals">
+      ${mnMissed>0||mnPartial>0 ? `<div class="sb-tot"><div class="sb-tot-lbl">Attention</div><div class="sb-tot-val" style="color:var(--amber)">${mnMissed+mnPartial} yr${mnMissed+mnPartial>1?'s':''}</div></div>` : `<div class="sb-tot"><div class="sb-tot-lbl">MN status</div><div class="sb-tot-val" style="color:var(--green)">All full</div></div>`}
+      <div class="sb-tot"><div class="sb-tot-lbl">MN funded</div><div class="sb-tot-val" style="color:var(--green)">€${Math.round(mnTotal/1000)}K</div></div>
+      <div class="sb-tot"><div class="sb-tot-lbl">AS funded</div><div class="sb-tot-val" style="color:var(--violet)">€${Math.round(asTotal/1000)}K</div></div>
+      <div class="sb-tot"><div class="sb-tot-lbl">Combined</div><div class="sb-tot-val" style="color:var(--cyan)">€${Math.round((mnTotal+asTotal)/1000)}K</div></div>
+    </div>
+  `;
+}
+
+function openBlock(id){ document.getElementById(id)?.classList.add('open'); }
+
+// ────────────────────────────────────────────────────────────────
+// OVERVIEW KPIs
+// ────────────────────────────────────────────────────────────────
+function buildOvKpis(){
+  const mnTotal = MN_BASE.reduce((a,r)=>a+sumDots(MN_DOTS,r.year),0);
+  const asTotal = AS_BASE.reduce((a,r)=>a+sumDots(AS_DOTS,r.year),0);
+  const mnJrTotal = MN_BASE.reduce((a,r)=>a+(r.jr||0),0);
+  const asJrTotal = AS_BASE.reduce((a,r)=>a+(r.jr||0),0);
+  document.getElementById('ovKpis').innerHTML = `
+    <div class="kpi-card">
+      <div class="kpi-lbl">MN · Total funded</div>
+      <div class="kpi-val" style="color:var(--green)">${fmtE(mnTotal)}</div>
+      <div class="kpi-sub">BND contributions 2014–2024</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-lbl">MN · Total jaarruimte</div>
+      <div class="kpi-val">${fmtE(mnJrTotal)}</div>
+      <div class="kpi-sub">base room (excl. reserv.)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-lbl">AS · Total funded</div>
+      <div class="kpi-val" style="color:var(--violet)">${fmtE(asTotal)}</div>
+      <div class="kpi-sub">BND contributions 2014–2018</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-lbl">Combined BND</div>
+      <div class="kpi-val" style="color:var(--cyan)">${fmtE(mnTotal+asTotal)}</div>
+      <div class="kpi-sub">MN + AS total</div>
+    </div>
+  `;
+}
+
+// ────────────────────────────────────────────────────────────────
+// TABS
+// ────────────────────────────────────────────────────────────────
+function switchTab(name){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('tab-btn-'+name).classList.add('active');
+}
+
+// ────────────────────────────────────────────────────────────────
+// SALDO RENDER
+// ────────────────────────────────────────────────────────────────
+function buildSaldoKpis(){
+  const li = SALDO_DATA.dates.length - 1;
+  const totalNow = saldoGrandTotal(li);
+  const mnNow = saldoTotalForPerson('mn', li);
+  const asNow = saldoTotalForPerson('as', li);
+  const verwTotal = projectionTotal('all', 'verwacht');
+  const slechtTotal = projectionTotal('all', 'slecht');
+  const goedTotal = projectionTotal('all', 'goed');
+
+  const mnCount = SALDO_CONFIG.filter(c => c.person === 'mn').length;
+  const asCount = SALDO_CONFIG.filter(c => c.person === 'as').length;
+  const pills = [
+    { lbl: 'Total saldo nu',     val: fmtE(totalNow),    sub: SALDO_DATA.dates[li] || '—', color: 'var(--green)' },
+  ];
+  if(mnCount > 0) pills.push({ lbl: 'MN saldo', val: fmtE(mnNow), sub: mnCount + (mnCount === 1 ? ' rekening' : ' rekeningen'), color: 'var(--blue)' });
+  if(asCount > 0) pills.push({ lbl: 'AS saldo', val: fmtE(asNow), sub: asCount + (asCount === 1 ? ' rekening' : ' rekeningen'), color: 'var(--pink, #f472b6)' });
+  pills.push({ lbl: 'Verwachte markt',    val: fmtE(verwTotal),   sub: 'BND projectie einddatum',  color: 'var(--cyan, #3ecfcf)' });
+  pills.push({ lbl: 'Bull / Bear range',  val: fmtE(slechtTotal) + ' .. ' + fmtE(goedTotal), sub: 'BND scenarios', color: 'var(--amber, #f4b942)', wide: true });
+  document.getElementById('saldoLastDate').textContent = SALDO_DATA.dates[li] || '—';
+  document.getElementById('saldoKpis').innerHTML = pills.map(p =>
+    `<div class="kpi" style="border-top:2px solid ${p.color};${p.wide ? 'min-width:240px' : ''}">
+      <div class="kpi-lbl" style="color:${p.color}">${p.lbl}</div>
+      <div class="kpi-val">${p.val}</div>
+      <div class="kpi-sub">${p.sub}</div>
+    </div>`
+  ).join('');
+}
+
+function buildSaldoTable(){
+  const li = SALDO_DATA.dates.length - 1;
+  let html = '<div style="overflow-x:auto"><table class="tbl" style="width:100%;border-collapse:collapse;font-size:11px">';
+  html += `<thead><tr>
+    <th style="text-align:left;padding:6px 9px;color:var(--t3, #4a6880);font-size:9px;text-transform:uppercase;letter-spacing:.08em">Rekening</th>
+    <th style="text-align:left;padding:6px 9px;color:var(--t3);font-size:9px;text-transform:uppercase;letter-spacing:.08em">Houder</th>
+    ${SALDO_DATA.dates.map(d => `<th style="text-align:right;padding:6px 9px;color:var(--t3);font-size:9px;text-transform:uppercase;letter-spacing:.08em">${d}</th>`).join('')}
+    <th style="text-align:right;padding:6px 9px;color:var(--t3);font-size:9px;text-transform:uppercase;letter-spacing:.08em">BND verwacht</th>
+  </tr></thead><tbody>`;
+
+  SALDO_CONFIG.forEach(c => {
+    const proj = SALDO_PROJECTION[c.iban] || {};
+    html += `<tr>
+      <td style="padding:5px 9px"><span style="display:inline-block;width:3px;height:11px;border-radius:99px;background:${c.color};margin-right:6px;vertical-align:middle"></span>${c.label} <span style="font-family:var(--mono);font-size:9px;color:var(--t4, #506880);margin-left:4px">${c.iban}</span></td>
+      <td style="padding:5px 9px;color:var(--t2, #8aa8c8)">${c.holder}</td>
+      ${SALDO_DATA.dates.map((_, i) => {
+        const v = SALDO_DATA.saldi[c.iban]?.[i];
+        return `<td style="padding:5px 9px;text-align:right;font-family:var(--mono);color:var(--t1, #e8f0f8);font-weight:600">${v != null ? fmtE(v) : '—'}</td>`;
+      }).join('')}
+      <td style="padding:5px 9px;text-align:right;font-family:var(--mono);color:var(--cyan, #3ecfcf)">${proj.verwacht ? fmtE(proj.verwacht) : '—'}</td>
+    </tr>`;
+    // Fund-level breakdown rows under this IBAN
+    const funds = SALDO_FUNDS[c.iban] || [];
+    funds.forEach(f => {
+      const fcolor = FUND_COLORS[f.type] || '#666';
+      const pct = SALDO_DATA.saldi[c.iban]?.[li] ? (f.waarde / SALDO_DATA.saldi[c.iban][li] * 100).toFixed(0) : '—';
+      html += `<tr style="background:rgba(10,28,54,.4)">
+        <td style="padding:3px 9px 3px 28px;font-size:10px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${fcolor};margin-right:6px"></span><span style="color:var(--t3, #4a6880)">${f.fund}</span> <span style="font-family:var(--mono);font-size:8px;color:var(--t4);margin-left:4px">${f.type} · ${f.aantal.toLocaleString('nl-NL')} units · €${f.koers}</span></td>
+        <td style="padding:3px 9px;font-size:10px;color:var(--t4, #506880);font-family:var(--mono)">${pct}%</td>
+        <td style="padding:3px 9px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--t2, #8aa8c8)" colspan="${SALDO_DATA.dates.length}">${fmtE(f.waarde)}</td>
+        <td style="padding:3px 9px"></td>
+      </tr>`;
+    });
+  });
+  // totals
+  html += `<tr style="border-top:2px solid var(--b2, #243d63);font-weight:700">
+    <td style="padding:7px 9px">Totaal</td>
+    <td style="padding:7px 9px"></td>
+    ${SALDO_DATA.dates.map((_, i) => `<td style="padding:7px 9px;text-align:right;font-family:var(--mono);color:var(--green)">${fmtE(saldoGrandTotal(i))}</td>`).join('')}
+    <td style="padding:7px 9px;text-align:right;font-family:var(--mono);color:var(--cyan, #3ecfcf)">${fmtE(projectionTotal('all','verwacht'))}</td>
+  </tr>`;
+  html += '</tbody></table></div>';
+  document.getElementById('saldoTable').innerHTML = html;
+}
+
+// ────────────────────────────────────────────────────────────────
+// SALDO EDITOR MODAL
+// ────────────────────────────────────────────────────────────────
+function openSaldoEditor(){
+  const li = SALDO_DATA.dates.length - 1;
+  const overlay = document.getElementById('saldoEditorOverlay');
+  const fields = document.getElementById('saldoEditorFields');
+  document.getElementById('saldoEditorDate').value = SALDO_DATA.dates[li] || '';
+  let html = '';
+  SALDO_CONFIG.forEach(c => {
+    const v = SALDO_DATA.saldi[c.iban]?.[li] ?? '';
+    html += `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0">
+      <div style="flex:1">
+        <div style="font-size:11px;color:var(--t2)">${c.label}</div>
+        <div style="font-size:9px;font-family:var(--mono);color:var(--t4)">${c.holder} · ${c.iban}</div>
+      </div>
+      <input type="number" id="sed_${c.iban}" value="${v}" style="width:120px;padding:5px 8px;text-align:right;background:var(--s2);border:1px solid var(--b1);border-radius:5px;color:var(--t1);font-family:var(--mono);font-size:12px">
+    </div>`;
+  });
+  fields.innerHTML = html;
+  overlay.style.display = 'flex';
+}
+function closeSaldoEditor(){ document.getElementById('saldoEditorOverlay').style.display = 'none'; }
+function saveSaldoEditor(){
+  const dateVal = document.getElementById('saldoEditorDate').value.trim();
+  if(!dateVal) return;
+  const li = SALDO_DATA.dates.length - 1;
+  const isNew = dateVal !== SALDO_DATA.dates[li];
+  if(isNew){
+    SALDO_DATA.dates.push(dateVal);
+    SALDO_CONFIG.forEach(c => {
+      if(!SALDO_DATA.saldi[c.iban]) SALDO_DATA.saldi[c.iban] = [];
+      SALDO_DATA.saldi[c.iban].push(null);
+    });
+  }
+  const newLi = SALDO_DATA.dates.length - 1;
+  SALDO_CONFIG.forEach(c => {
+    const v = parseFloat(document.getElementById('sed_' + c.iban)?.value);
+    if(!isNaN(v)){
+      if(!SALDO_DATA.saldi[c.iban]) SALDO_DATA.saldi[c.iban] = [];
+      SALDO_DATA.saldi[c.iban][newLi] = v;
+    }
+  });
+  persistSaldo();
+  closeSaldoEditor();
+  buildSaldoKpis();
+  buildSaldoTable();
+}
+
+// ────────────────────────────────────────────────────────────────
+// PDF EXPORT (html2canvas-pro + jsPDF)
+// ────────────────────────────────────────────────────────────────
+function exportPensionPDF(){
+  const btn = document.getElementById('exportPdfBtn');
+  if(btn) btn.style.visibility = 'hidden';
+  const target = document.body;
+  const filename = 'Nijhuis_Pension_' + new Date().toISOString().slice(0,10) + '.pdf';
+  const DESKTOP_W = 1200;
+  html2canvas(target, {
+    scale: 2,
+    backgroundColor: '#020c1a',
+    logging: false,
+    useCORS: true,
+    width: DESKTOP_W,
+    windowWidth: DESKTOP_W,
+    onclone: (doc) => {
+      const body = doc.body;
+      if(body){ body.style.width = DESKTOP_W+'px'; body.style.minWidth = DESKTOP_W+'px'; body.style.maxWidth = DESKTOP_W+'px'; body.style.background = '#020c1a'; }
+      if(doc.documentElement){ doc.documentElement.style.background = '#020c1a'; }
+      const eb = doc.getElementById('exportPdfBtn');
+      if(eb) eb.style.display = 'none';
+    },
+  }).then(canvas => {
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit:'mm', format:'a4', orientation:'portrait' });
+    const pdfW = 210, pdfH = 297;
+    pdf.setFillColor(2, 12, 26); pdf.rect(0,0,pdfW,pdfH,'F');
+    const imgH = (canvas.height * pdfW) / canvas.width;
+    if(imgH <= pdfH){
+      pdf.addImage(imgData, 'JPEG', 0, Math.max(0,(pdfH-imgH)/2), pdfW, imgH);
+    } else {
+      let heightLeft = imgH, position = 0;
+      pdf.addImage(imgData, 'JPEG', 0, position, pdfW, imgH);
+      heightLeft -= pdfH;
+      while(heightLeft > 0){
+        position = heightLeft - imgH;
+        pdf.addPage();
+        pdf.setFillColor(2,12,26); pdf.rect(0,0,pdfW,pdfH,'F');
+        pdf.addImage(imgData, 'JPEG', 0, position, pdfW, imgH);
+        heightLeft -= pdfH;
+      }
+    }
+    pdf.save(filename);
+  }).catch(err => {
+    console.error('PDF export failed:', err);
+    alert('PDF export failed. Try opening the page directly in a browser.');
+  }).finally(() => {
+    if(btn) btn.style.visibility = 'visible';
+  });
+}
+
+// ────────────────────────────────────────────────────────────────
+// INIT
+// ────────────────────────────────────────────────────────────────
+loadSaldo();
+buildSaldoKpis();
+buildSaldoTable();
+buildStatusBar();
+buildOvKpis();
+buildTable(MN_BASE, MN_DOTS, 'mnTableBody', true);
+// removed AS table
+buildBlocks(MN_BASE, MN_DOTS, MN_NOTES, 'mnBlocks', 'mn');
+// removed AS blocks
+rebuildCharts();
+</script>
+</body>
+</html>
