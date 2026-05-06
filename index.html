@@ -297,7 +297,7 @@ body{background:var(--bg);color:var(--t2);font-family:var(--sans);min-height:100
 
 </div>
 
-<!-- JAARRUIMTE (fiscaal) -->
+<!-- TAX ROOM (fiscal) -->
 <div class="tab-panel" id="tab-jaar">
   <div class="status-bar" id="statusBar" style="margin-bottom:14px"></div>
   <div class="sdiv">Tax-free contribution room overview</div>
@@ -326,7 +326,7 @@ body{background:var(--bg);color:var(--t2);font-family:var(--sans);min-height:100
   </div>
 
   <div class="info-box">
-    <strong>How jaarruimte works:</strong> Annual contribution room is based on prior year taxable income minus AOW franchise, multiplied by the applicable rate (13.3% post-2023). Unused room accumulates as reserveringsruimte for up to 10 years. MN 2024 had unusually high jaarruimte (€35,798) due to €405K taxable income including deferred Roamler proceeds.
+    <strong>How tax-free contribution room works:</strong> Annual contribution room is based on prior year taxable income minus AOW threshold, multiplied by the applicable rate (13.3% post-2023). Unused room accumulates as carry-forward for up to 10 years. Michiel 2024 had unusually high room (€35,798) due to €405K taxable income including deferred Roamler proceeds.
   </div>
 </div>
 
@@ -416,7 +416,7 @@ const MN_BASE = [
   {year:2024, dotYear:2025, income:405426, franchise:18475, grondslag:386951, jr:35798,   reserv:0,    note:'Unusually high — €405K income incl. deferred Roamler proceeds'},
   {year:2023, dotYear:2024, income:60000,  franchise:17545, grondslag:42455,  jr:12737,   reserv:0,    note:''},
   {year:2022, dotYear:2023, income:60000,  franchise:13646, grondslag:46354,  jr:13906,   reserv:2884, note:''},
-  {year:2021, dotYear:2022, income:60000,  franchise:12837, grondslag:47163,  jr:6273,    reserv:0,    note:'Invested slightly over jaarruimte'},
+  {year:2021, dotYear:2022, income:60000,  franchise:12837, grondslag:47163,  jr:6273,    reserv:0,    note:'Invested slightly over tax room'},
   {year:2020, dotYear:2021, income:36333,  franchise:12672, grondslag:23661,  jr:3147,    reserv:0,    note:'Nothing contributed (only UWV income)'},
   {year:2019, dotYear:2020, income:152479, franchise:12472, grondslag:140007, jr:12986,   reserv:0,    note:''},
   {year:2018, dotYear:2019, income:315908, franchise:12275, grondslag:303633, jr:12678,   reserv:0,    note:''},
@@ -508,7 +508,7 @@ function buildTable(base, dotsObj, tbodyId, showReserv){
   let totJr=0, totBnd=0;
   let html = '';
   base.forEach(r => {
-    if(!r.jr) return; // skip rows without jaarruimte (2025 future)
+    if(!r.jr) return; // skip rows without tax room (2025 future)
     const avail = (r.jr||0) + (r.reserv||0);
     const used  = sumDots(dotsObj, r.year);
     const rem   = avail - used;
@@ -571,7 +571,7 @@ function buildBlocks(base, dotsObj, notesObj, containerId, person){
         <div class="yh-stats">
           <div class="yh-stat"><div class="yh-stat-lbl">Income</div><div class="yh-stat-val">${r.income?fmtE(r.income):'TBD'}</div></div>
           <div class="yh-stat"><div class="yh-stat-lbl">Tax room</div><div class="yh-stat-val" style="color:var(--green)">${r.jr?fmtE(r.jr):'—'}</div></div>
-          ${r.reserv&&r.reserv>0?`<div class="yh-stat"><div class="yh-stat-lbl">+ Reserv.</div><div class="yh-stat-val" style="color:var(--cyan)">+${fmtE(r.reserv)}</div></div>`:''}
+          ${r.reserv&&r.reserv>0?`<div class="yh-stat"><div class="yh-stat-lbl">+ Carry</div><div class="yh-stat-val" style="color:var(--cyan)">+${fmtE(r.reserv)}</div></div>`:''}
           <div class="yh-stat"><div class="yh-stat-lbl">Available</div><div class="yh-stat-val">${avail>0?fmtE(avail):'—'}</div></div>
           <div class="yh-stat"><div class="yh-stat-lbl">BND total</div><div class="yh-stat-val" style="color:var(--green)">${used>0?fmtE(used):'—'}</div></div>
           <div class="yh-stat"><div class="yh-stat-lbl">Remaining</div><div class="yh-stat-val" style="color:${over?'var(--red)':rem>50?'var(--amber)':'var(--t3)'}">${avail>0?(over?'OVER':rem<50?'✓ full':fmtE(rem)):'—'}</div></div>
@@ -760,7 +760,7 @@ function buildPersonChart(base, dotsObj, canvasId, jrColor, bndColor){
   if(!canvas) return;
   charts[canvasId] = new Chart(canvas, {type:'bar',
     data:{labels, datasets:[
-      {label:'Jaarruimte',data:jrVals,backgroundColor:jrColor+'40',borderColor:jrColor,borderWidth:1,borderRadius:2},
+      {label:'Tax room',data:jrVals,backgroundColor:jrColor+'40',borderColor:jrColor,borderWidth:1,borderRadius:2},
       {label:'BND total',data:bndVals,backgroundColor:bndColor+'66',borderColor:bndColor,borderWidth:1,borderRadius:2},
     ]},
     options:{responsive:true,maintainAspectRatio:false,
@@ -778,7 +778,7 @@ function buildPersonChart(base, dotsObj, canvasId, jrColor, bndColor){
 // STATUS BAR — year funding pills
 // ────────────────────────────────────────────────────────────────
 function pillState(r, dotsObj){
-  if(!r.jr) return 'future';         // no jaarruimte yet known
+  if(!r.jr) return 'future';         // no tax room yet known
   const avail = (r.jr||0)+(r.reserv||0);
   const used  = sumDots(dotsObj, r.year);
   if(used === 0 && avail > 0) return 'missed';
@@ -840,24 +840,24 @@ function buildOvKpis(){
   const asJrTotal = AS_BASE.reduce((a,r)=>a+(r.jr||0),0);
   document.getElementById('ovKpis').innerHTML = `
     <div class="kpi-card">
-      <div class="kpi-lbl">MN · Total funded</div>
+      <div class="kpi-lbl">Michiel · Total funded</div>
       <div class="kpi-val" style="color:var(--green)">${fmtE(mnTotal)}</div>
       <div class="kpi-sub">BND contributions 2014–2024</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-lbl">MN · Total jaarruimte</div>
+      <div class="kpi-lbl">Michiel · Total tax room</div>
       <div class="kpi-val">${fmtE(mnJrTotal)}</div>
-      <div class="kpi-sub">base room (excl. reserv.)</div>
+      <div class="kpi-sub">base room (excl. carry-forward)</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-lbl">AS · Total funded</div>
+      <div class="kpi-lbl">Alexandra · Total funded</div>
       <div class="kpi-val" style="color:var(--violet)">${fmtE(asTotal)}</div>
       <div class="kpi-sub">BND contributions 2014–2018</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-lbl">Combined BND</div>
       <div class="kpi-val" style="color:var(--cyan)">${fmtE(mnTotal+asTotal)}</div>
-      <div class="kpi-sub">MN + AS total</div>
+      <div class="kpi-sub">Michiel + Alexandra total</div>
     </div>
   `;
 }
