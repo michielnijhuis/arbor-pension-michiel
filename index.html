@@ -220,9 +220,9 @@ body{background:var(--bg);color:var(--t2);font-family:var(--sans);min-height:100
 <!-- SALDO EDITOR MODAL -->
 <div id="saldoEditorOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto" onclick="if(event.target.id==='saldoEditorOverlay')closeSaldoEditor()">
   <div style="background:var(--s1, #071428);border:1px solid var(--b2, #243d63);border-radius:10px;padding:22px;max-width:480px;width:100%;margin:auto">
-    <div style="font-size:14px;font-weight:700;color:var(--t1, #e8f0f8);margin-bottom:14px">Update BND saldi</div>
+    <div style="font-size:14px;font-weight:700;color:var(--t1, #e8f0f8);margin-bottom:14px">Update BND balances</div>
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--b1);margin-bottom:8px">
-      <div style="font-size:11px;color:var(--t2)">Datum van deze update <small style="display:block;font-size:9px;color:var(--t4)">bv. "May '26" of "31 May 2026"</small></div>
+      <div style="font-size:11px;color:var(--t2)">Date of this update <small style="display:block;font-size:9px;color:var(--t4)">e.g. "May '26" or "31 May 2026"</small></div>
       <input id="saldoEditorDate" style="width:130px;padding:5px 8px;text-align:right;background:var(--s2);border:1px solid var(--b1);border-radius:5px;color:var(--t1);font-family:var(--mono);font-size:12px">
     </div>
     <div id="saldoEditorFields"></div>
@@ -239,13 +239,13 @@ body{background:var(--bg);color:var(--t2);font-family:var(--sans);min-height:100
     <div>
       <div class="brand">Nijhuis Finance</div>
       <div class="title">Pension · Michiel</div>
-      <div class="title-sub">M.F.E. Nijhuis · Brand New Day · BND saldo + jaarruimte</div>
+      <div class="title-sub">M.F.E. Nijhuis · Brand New Day · BND balance + tax room</div>
     </div>
   </div>
   <div class="tabs-row">
-    <button class="tab-btn active" id="tab-btn-overview" onclick="switchTab('overview')">Saldo</button>
-    <button class="tab-btn" id="tab-btn-mn" onclick="switchTab('mn')">Jaarruimte log</button>
-    <button class="tab-btn" id="tab-btn-jaar" onclick="switchTab('jaar')">Jaarruimte (fiscaal)</button>
+    <button class="tab-btn active" id="tab-btn-overview" onclick="switchTab('overview')">Balance</button>
+    <button class="tab-btn" id="tab-btn-mn" onclick="switchTab('mn')">Contribution log</button>
+    <button class="tab-btn" id="tab-btn-jaar" onclick="switchTab('jaar')">Tax room</button>
   </div>
 </div>
 
@@ -255,12 +255,12 @@ body{background:var(--bg);color:var(--t2);font-family:var(--sans);min-height:100
 <div class="tab-panel active" id="tab-overview">
 
   <!-- BND SALDO SECTION -->
-  <div class="sdiv">BND Saldo · belegd vermogen pensioenrekeningen</div>
+  <div class="sdiv">BND Balance · invested pension capital</div>
   <div class="kpi-grid" id="saldoKpis"></div>
   <div class="panel" style="margin-bottom:14px">
     <div class="panel-hdr">
-      <div class="panel-title">Saldo per rekening · <span id="saldoLastDate">—</span></div>
-      <button class="ctrl-btn primary" onclick="openSaldoEditor()" style="font-size:11px;padding:4px 10px">+ Update saldi</button>
+      <div class="panel-title">Balance per account · <span id="saldoLastDate">—</span></div>
+      <button class="ctrl-btn primary" onclick="openSaldoEditor()" style="font-size:11px;padding:4px 10px">+ Update balances</button>
     </div>
     <div class="panel-body" id="saldoTable"></div>
   </div>
@@ -270,24 +270,24 @@ body{background:var(--bg);color:var(--t2);font-family:var(--sans);min-height:100
 <!-- JAARRUIMTE (fiscaal) -->
 <div class="tab-panel" id="tab-jaar">
   <div class="status-bar" id="statusBar" style="margin-bottom:14px"></div>
-  <div class="sdiv">Jaarruimte · contribution room overview</div>
+  <div class="sdiv">Tax-free contribution room overview</div>
   <div class="kpi-grid" id="ovKpis"></div>
   <div class="chart-row">
     <div class="panel">
       <div class="panel-hdr">
-        <div class="panel-title">MN · Jaarruimte vs BND Contributions</div>
+        <div class="panel-title">Michiel · Tax room vs BND contributions</div>
       </div>
       <div class="panel-body"><div class="chart-h220"><canvas id="mnChart"></canvas></div></div>
     </div>
   </div>
 
-  <div class="sdiv">MN · Jaarruimte log 2014–2025</div>
+  <div class="sdiv">Michiel · Contribution log 2014–2025</div>
   <div class="panel">
     <div class="ov-scroll">
       <table class="jr-table"><thead><tr>
-        <th>Opbouw</th><th>Dotatie jr</th><th class="r">Taxable income</th>
-        <th class="r">AOW franchise</th><th class="r">Premiegrondslag</th>
-        <th class="r">Jaarruimte</th><th class="r">Reserv.ruimte</th>
+        <th>Year</th><th>Contribution yr</th><th class="r">Taxable income</th>
+        <th class="r">AOW threshold</th><th class="r">Premium base</th>
+        <th class="r">Tax room</th><th class="r">Carry-forward</th>
         <th class="r">Available</th><th class="r">BND total</th>
         <th class="r">Remaining</th><th>Usage</th><th>Note</th>
       </tr></thead>
@@ -306,7 +306,7 @@ body{background:var(--bg);color:var(--t2);font-family:var(--sans);min-height:100
     <span class="person-badge mn-badge">MN</span>
     <div>
       <div class="psh-name">Michiel Nijhuis · Brand New Day</div>
-      <div class="psh-meta">Click year to expand · log individual BND dotations per year</div>
+      <div class="psh-meta">Click year to expand · log individual BND contributions per year</div>
     </div>
   </div>
   <div id="mnBlocks"></div>
@@ -320,8 +320,8 @@ body{background:var(--bg);color:var(--t2);font-family:var(--sans);min-height:100
 // BND SALDO CONFIG + DATA
 // ════════════════════════════════════════════════════════════════
 const SALDO_CONFIG = [
-  { iban: 'NL69BNDA0100009224', holder: 'Michiel', label: 'Pensioenrekening (hoofd)',     person: 'mn', color: '#4d9ef8' },
-  { iban: 'NL73BNDA0100009152', holder: 'Michiel', label: 'Pensioenrekening (secundair)', person: 'mn', color: '#3ecfcf' },
+  { iban: 'NL69BNDA0100009224', holder: 'Michiel', label: 'Pension account (main)',     person: 'mn', color: '#4d9ef8' },
+  { iban: 'NL73BNDA0100009152', holder: 'Michiel', label: 'Pension account (secondary)', person: 'mn', color: '#3ecfcf' },
 ];
 
 // Verwachte markt projection per IBAN at retirement (BND)
@@ -540,7 +540,7 @@ function buildBlocks(base, dotsObj, notesObj, containerId, person){
         <div class="yh-year">${r.year}<small>dot. ${r.dotYear}</small></div>
         <div class="yh-stats">
           <div class="yh-stat"><div class="yh-stat-lbl">Income</div><div class="yh-stat-val">${r.income?fmtE(r.income):'TBD'}</div></div>
-          <div class="yh-stat"><div class="yh-stat-lbl">Jaarruimte</div><div class="yh-stat-val" style="color:var(--green)">${r.jr?fmtE(r.jr):'—'}</div></div>
+          <div class="yh-stat"><div class="yh-stat-lbl">Tax room</div><div class="yh-stat-val" style="color:var(--green)">${r.jr?fmtE(r.jr):'—'}</div></div>
           ${r.reserv&&r.reserv>0?`<div class="yh-stat"><div class="yh-stat-lbl">+ Reserv.</div><div class="yh-stat-val" style="color:var(--cyan)">+${fmtE(r.reserv)}</div></div>`:''}
           <div class="yh-stat"><div class="yh-stat-lbl">Available</div><div class="yh-stat-val">${avail>0?fmtE(avail):'—'}</div></div>
           <div class="yh-stat"><div class="yh-stat-lbl">BND total</div><div class="yh-stat-val" style="color:var(--green)">${used>0?fmtE(used):'—'}</div></div>
@@ -557,10 +557,10 @@ function buildBlocks(base, dotsObj, notesObj, containerId, person){
       <div class="yr-body">
         <div class="calc-row">
           <div class="calc-item"><div class="calc-lbl">Taxable income</div><div class="calc-val">${r.income?fmtE(r.income):'TBD'}</div></div>
-          <div class="calc-item"><div class="calc-lbl">AOW franchise</div><div class="calc-val dim">− ${fmtE(r.franchise)}</div></div>
-          <div class="calc-item"><div class="calc-lbl">Premiegrondslag</div><div class="calc-val highlight">${r.grondslag?fmtE(r.grondslag):'TBD'}</div></div>
-          <div class="calc-item"><div class="calc-lbl">Jaarruimte</div><div class="calc-val green">${r.jr?fmtE(r.jr):'TBD'}</div></div>
-          <div class="calc-item"><div class="calc-lbl">Reserv.ruimte</div><div class="calc-val" style="color:var(--cyan)">${r.reserv&&r.reserv>0?'+'+fmtE(r.reserv):'—'}</div></div>
+          <div class="calc-item"><div class="calc-lbl">AOW threshold</div><div class="calc-val dim">− ${fmtE(r.franchise)}</div></div>
+          <div class="calc-item"><div class="calc-lbl">Premium base</div><div class="calc-val highlight">${r.grondslag?fmtE(r.grondslag):'TBD'}</div></div>
+          <div class="calc-item"><div class="calc-lbl">Tax room</div><div class="calc-val green">${r.jr?fmtE(r.jr):'TBD'}</div></div>
+          <div class="calc-item"><div class="calc-lbl">Carry-forward</div><div class="calc-val" style="color:var(--cyan)">${r.reserv&&r.reserv>0?'+'+fmtE(r.reserv):'—'}</div></div>
           <div class="calc-item"><div class="calc-lbl">Max available</div><div class="calc-val hi">${avail>0?fmtE(avail):'TBD'}</div></div>
         </div>
         <div class="dot-section">
@@ -788,12 +788,12 @@ function buildStatusBar(){
 
   document.getElementById('statusBar').innerHTML = `
     <div class="sb-person">
-      <span class="sb-lbl" style="color:var(--blue)">Jaarruimte</span>
+      <span class="sb-lbl" style="color:var(--blue)">Tax room</span>
       <div class="sb-pills">${mnPills}</div>
     </div>
     <div class="sb-totals">
       ${mnMissed>0||mnPartial>0 ? `<div class="sb-tot"><div class="sb-tot-lbl">Attention</div><div class="sb-tot-val" style="color:var(--amber)">${mnMissed+mnPartial} yr${mnMissed+mnPartial>1?'s':''}</div></div>` : `<div class="sb-tot"><div class="sb-tot-lbl">Status</div><div class="sb-tot-val" style="color:var(--green)">All full</div></div>`}
-      <div class="sb-tot"><div class="sb-tot-lbl">JR funded</div><div class="sb-tot-val" style="color:var(--green)">€${Math.round(mnTotal/1000)}K</div></div>
+      <div class="sb-tot"><div class="sb-tot-lbl">Funded YTD</div><div class="sb-tot-val" style="color:var(--green)">€${Math.round(mnTotal/1000)}K</div></div>
     </div>
   `;
 }
@@ -857,12 +857,12 @@ function buildSaldoKpis(){
   const mnCount = SALDO_CONFIG.filter(c => c.person === 'mn').length;
   const asCount = SALDO_CONFIG.filter(c => c.person === 'as').length;
   const pills = [
-    { lbl: 'Total saldo nu',     val: fmtE(totalNow),    sub: SALDO_DATA.dates[li] || '—', color: 'var(--green)' },
+    { lbl: 'Current balance',     val: fmtE(totalNow),    sub: SALDO_DATA.dates[li] || '—', color: 'var(--green)' },
   ];
-  if(mnCount > 0) pills.push({ lbl: 'MN saldo', val: fmtE(mnNow), sub: mnCount + (mnCount === 1 ? ' rekening' : ' rekeningen'), color: 'var(--blue)' });
-  if(asCount > 0) pills.push({ lbl: 'AS saldo', val: fmtE(asNow), sub: asCount + (asCount === 1 ? ' rekening' : ' rekeningen'), color: 'var(--pink, #f472b6)' });
-  pills.push({ lbl: 'Verwachte markt',    val: fmtE(verwTotal),   sub: 'BND projectie einddatum',  color: 'var(--cyan, #3ecfcf)' });
-  pills.push({ lbl: 'Bull / Bear range',  val: fmtE(slechtTotal) + ' .. ' + fmtE(goedTotal), sub: 'BND scenarios', color: 'var(--amber, #f4b942)', wide: true });
+  if(mnCount > 0) pills.push({ lbl: 'Michiel balance', val: fmtE(mnNow), sub: mnCount + (mnCount === 1 ? ' account' : ' accounts'), color: 'var(--blue)' });
+  if(asCount > 0) pills.push({ lbl: 'Alexandra balance', val: fmtE(asNow), sub: asCount + (asCount === 1 ? ' account' : ' accounts'), color: 'var(--pink, #f472b6)' });
+  pills.push({ lbl: 'Projected at maturity',    val: fmtE(verwTotal),   sub: 'BND projection at end date',  color: 'var(--cyan, #3ecfcf)' });
+  pills.push({ lbl: 'Bull / bear range',  val: fmtE(slechtTotal) + ' .. ' + fmtE(goedTotal), sub: 'BND scenarios', color: 'var(--amber, #f4b942)', wide: true });
   document.getElementById('saldoLastDate').textContent = SALDO_DATA.dates[li] || '—';
   document.getElementById('saldoKpis').innerHTML = pills.map(p =>
     `<div class="kpi" style="border-top:2px solid ${p.color};${p.wide ? 'min-width:240px' : ''}">
@@ -877,10 +877,10 @@ function buildSaldoTable(){
   const li = SALDO_DATA.dates.length - 1;
   let html = '<div style="overflow-x:auto"><table class="tbl" style="width:100%;border-collapse:collapse;font-size:11px">';
   html += `<thead><tr>
-    <th style="text-align:left;padding:6px 9px;color:var(--t3, #4a6880);font-size:9px;text-transform:uppercase;letter-spacing:.08em">Rekening</th>
-    <th style="text-align:left;padding:6px 9px;color:var(--t3);font-size:9px;text-transform:uppercase;letter-spacing:.08em">Houder</th>
+    <th style="text-align:left;padding:6px 9px;color:var(--t3, #4a6880);font-size:9px;text-transform:uppercase;letter-spacing:.08em">Account</th>
+    <th style="text-align:left;padding:6px 9px;color:var(--t3);font-size:9px;text-transform:uppercase;letter-spacing:.08em">Holder</th>
     ${SALDO_DATA.dates.map(d => `<th style="text-align:right;padding:6px 9px;color:var(--t3);font-size:9px;text-transform:uppercase;letter-spacing:.08em">${d}</th>`).join('')}
-    <th style="text-align:right;padding:6px 9px;color:var(--t3);font-size:9px;text-transform:uppercase;letter-spacing:.08em">BND verwacht</th>
+    <th style="text-align:right;padding:6px 9px;color:var(--t3);font-size:9px;text-transform:uppercase;letter-spacing:.08em">BND projected</th>
   </tr></thead><tbody>`;
 
   SALDO_CONFIG.forEach(c => {
@@ -909,7 +909,7 @@ function buildSaldoTable(){
   });
   // totals
   html += `<tr style="border-top:2px solid var(--b2, #243d63);font-weight:700">
-    <td style="padding:7px 9px">Totaal</td>
+    <td style="padding:7px 9px">Total</td>
     <td style="padding:7px 9px"></td>
     ${SALDO_DATA.dates.map((_, i) => `<td style="padding:7px 9px;text-align:right;font-family:var(--mono);color:var(--green)">${fmtE(saldoGrandTotal(i))}</td>`).join('')}
     <td style="padding:7px 9px;text-align:right;font-family:var(--mono);color:var(--cyan, #3ecfcf)">${fmtE(projectionTotal('all','verwacht'))}</td>
