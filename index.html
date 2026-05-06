@@ -788,19 +788,12 @@ function buildStatusBar(){
 
   document.getElementById('statusBar').innerHTML = `
     <div class="sb-person">
-      <span class="sb-lbl" style="color:var(--blue)">MN</span>
+      <span class="sb-lbl" style="color:var(--blue)">Jaarruimte</span>
       <div class="sb-pills">${mnPills}</div>
     </div>
-    <div class="sb-divider"></div>
-    <div class="sb-person">
-      <span class="sb-lbl" style="color:var(--violet)">AS</span>
-      <div class="sb-pills">${asPills}</div>
-    </div>
     <div class="sb-totals">
-      ${mnMissed>0||mnPartial>0 ? `<div class="sb-tot"><div class="sb-tot-lbl">Attention</div><div class="sb-tot-val" style="color:var(--amber)">${mnMissed+mnPartial} yr${mnMissed+mnPartial>1?'s':''}</div></div>` : `<div class="sb-tot"><div class="sb-tot-lbl">MN status</div><div class="sb-tot-val" style="color:var(--green)">All full</div></div>`}
-      <div class="sb-tot"><div class="sb-tot-lbl">MN funded</div><div class="sb-tot-val" style="color:var(--green)">€${Math.round(mnTotal/1000)}K</div></div>
-      <div class="sb-tot"><div class="sb-tot-lbl">AS funded</div><div class="sb-tot-val" style="color:var(--violet)">€${Math.round(asTotal/1000)}K</div></div>
-      <div class="sb-tot"><div class="sb-tot-lbl">Combined</div><div class="sb-tot-val" style="color:var(--cyan)">€${Math.round((mnTotal+asTotal)/1000)}K</div></div>
+      ${mnMissed>0||mnPartial>0 ? `<div class="sb-tot"><div class="sb-tot-lbl">Attention</div><div class="sb-tot-val" style="color:var(--amber)">${mnMissed+mnPartial} yr${mnMissed+mnPartial>1?'s':''}</div></div>` : `<div class="sb-tot"><div class="sb-tot-lbl">Status</div><div class="sb-tot-val" style="color:var(--green)">All full</div></div>`}
+      <div class="sb-tot"><div class="sb-tot-lbl">JR funded</div><div class="sb-tot-val" style="color:var(--green)">€${Math.round(mnTotal/1000)}K</div></div>
     </div>
   `;
 }
