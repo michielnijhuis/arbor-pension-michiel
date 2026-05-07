@@ -385,12 +385,21 @@ const FUND_COLORS = {
   'Bonds':    '#3ecfcf',
 };
 
+const SALDO_VERSION = '2026-05-07';  // bump on every BND-scrape commit; triggers localStorage refresh
 let SALDO_DATA;
 function loadSaldo(){
-  try { const s = localStorage.getItem('pension_saldo_v1'); if(s){ SALDO_DATA = JSON.parse(s); return; } } catch(e){}
+  try {
+    const s = localStorage.getItem('pension_saldo_v1');
+    if (s) {
+      const parsed = JSON.parse(s);
+      if (parsed && parsed._version === SALDO_VERSION) { SALDO_DATA = parsed; return; }
+    }
+  } catch(e){}
   SALDO_DATA = JSON.parse(JSON.stringify(SALDO_DEFAULT_DATA));
+  SALDO_DATA._version = SALDO_VERSION;
 }
 function persistSaldo(){
+  SALDO_DATA._version = SALDO_VERSION;
   try { localStorage.setItem('pension_saldo_v1', JSON.stringify(SALDO_DATA)); } catch(e){}
 }
 
