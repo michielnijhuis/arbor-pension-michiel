@@ -7,6 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas-pro@1.5.8/dist/html2canvas-pro.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
@@ -385,22 +386,62 @@ const FUND_COLORS = {
   'Bonds':    '#3ecfcf',
 };
 
-const SALDO_VERSION = '2026-05-07';  // bump on every BND-scrape commit; triggers localStorage refresh
+// Supabase client (centralised so iPhone PWA + Macbook stay in sync)
+const SB_URL = 'https://iptrnxjtatuydafnxdcz.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlwdHJueGp0YXR1eWRhZm54ZGN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0Njg1NDMsImV4cCI6MjA5MTA0NDU0M30.hyB2Vsc66CNGSiX-X3s1FWLoVf8iWg7FBP-ub_mu9kk';
+const sb = window.supabase.createClient(SB_URL, SB_KEY);
+const PENSION_PERSON = 'michiel';
+
 let SALDO_DATA;
-function loadSaldo(){
+
+async function loadSaldo(){
   try {
-    const s = localStorage.getItem('pension_saldo_v1');
-    if (s) {
-      const parsed = JSON.parse(s);
-      if (parsed && parsed._version === SALDO_VERSION) { SALDO_DATA = parsed; return; }
+    const { data, error } = await sb
+      .from('bnd_account_balances')
+      .select('iban, date_label, value_eur, created_at')
+      .eq('person', PENSION_PERSON)
+      .eq('account_kind', 'pension')
+      .order('date_label', { ascending: true });
+    if (error) throw error;
+    if (data && data.length) {
+      const dates = [...new Set(data.map(r => r.date_label))];
+      const saldi = {};
+      for (const r of data) {
+        if (!saldi[r.iban]) saldi[r.iban] = new Array(dates.length).fill(null);
+        saldi[r.iban][dates.indexOf(r.date_label)] = Number(r.value_eur);
+      }
+      SALDO_DATA = { dates, saldi };
+      return;
     }
-  } catch(e){}
+  } catch(e) {
+    console.warn('Supabase loadSaldo failed, falling back to defaults:', e);
+  }
   SALDO_DATA = JSON.parse(JSON.stringify(SALDO_DEFAULT_DATA));
-  SALDO_DATA._version = SALDO_VERSION;
 }
-function persistSaldo(){
-  SALDO_DATA._version = SALDO_VERSION;
-  try { localStorage.setItem('pension_saldo_v1', JSON.stringify(SALDO_DATA)); } catch(e){}
+
+async function persistSaldo(){
+  // Upsert every (iban, date_label) present in SALDO_DATA.
+  const rows = [];
+  SALDO_DATA.dates.forEach((dateLabel, i) => {
+    for (const c of SALDO_CONFIG) {
+      const v = SALDO_DATA.saldi[c.iban]?.[i];
+      if (v == null || isNaN(Number(v))) continue;
+      rows.push({
+        iban: c.iban,
+        person: PENSION_PERSON,
+        account_label: c.label,
+        account_kind: 'pension',
+        date_label: dateLabel,
+        value_eur: Number(v),
+        source: 'manual edit',
+      });
+    }
+  });
+  if (rows.length === 0) return;
+  const { error } = await sb
+    .from('bnd_account_balances')
+    .upsert(rows, { onConflict: 'iban,date_label' });
+  if (error) console.error('Supabase persistSaldo failed:', error);
 }
 
 function saldoTotalForPerson(person, idx){
@@ -1098,7 +1139,7 @@ function saveSaldoEditor(){
       SALDO_DATA.saldi[c.iban][newLi] = v;
     }
   });
-  persistSaldo();
+  persistSaldo().catch(e => console.error('persistSaldo:', e));
   closeSaldoEditor();
   buildSaldoKpis();
   buildSaldoTable();
@@ -1160,13 +1201,15 @@ function exportPensionPDF(){
 // ────────────────────────────────────────────────────────────────
 // INIT
 // ────────────────────────────────────────────────────────────────
-loadSaldo();
-buildSaldoHero();
-buildScenarioChart();
-buildAllocChart();
-buildSaldoKpis();
-buildSaldoTable();
-buildStatusBar();
+(async () => {
+  await loadSaldo();
+  buildSaldoHero();
+  buildScenarioChart();
+  buildAllocChart();
+  buildSaldoKpis();
+  buildSaldoTable();
+  buildStatusBar();
+})();
 buildOvKpis();
 buildTable(MN_BASE, MN_DOTS, 'mnTableBody', true);
 // removed AS table
