@@ -1236,17 +1236,15 @@ function exportPensionPDF(){
   buildSaldoKpis();
   buildSaldoTable();
   buildStatusBar();
-  // Load dotations + notes from Supabase, then rebuild dotation table
+  // Load dotations + notes from Supabase, then rebuild dotation table + blocks
   const sbDots = await loadDotsFromSb('mn');
   if (sbDots) MN_DOTS = sbDots;
   MN_NOTES = await loadNotesFromSb('mn');
   buildOvKpis();
   buildTable(MN_BASE, MN_DOTS, 'mnTableBody', true);
+  buildBlocks(MN_BASE, MN_DOTS, MN_NOTES, 'mnBlocks', 'mn');
+  rebuildCharts();
 })();
-// removed AS table
-buildBlocks(MN_BASE, MN_DOTS, MN_NOTES, 'mnBlocks', 'mn');
-// removed AS blocks
-rebuildCharts();
 </script>
 </body>
 </html>
