@@ -9,7 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#020c1a;--s1:#071428;--s2:#0a1c36;--s3:#0f2444;
@@ -17,7 +17,8 @@
   --t1:#e8f0f8;--t2:#8aa8c8;--t3:#4a6880;--t4:#2a4060;
   --blue:#4d9ef8;--green:#2dd4a0;--amber:#f4b942;--red:#f06868;
   --violet:#9b7ff4;--cyan:#3ecfcf;--orange:#fb923c;
-  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
+  --teal:#2dd4c2;--teal-soft:#00b5a5;
+  --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;--sans:'Inter',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
 }
 body{background:var(--bg);color:var(--t2);font-family:var(--sans);min-height:100vh}
 
@@ -841,11 +842,11 @@ function buildPersonChart(base, dotsObj, canvasId, jrColor, bndColor){
       {label:'BND total',data:bndVals,backgroundColor:bndColor+'66',borderColor:bndColor,borderWidth:1,borderRadius:2},
     ]},
     options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:true,labels:{color:TK,font:{size:9,family:'IBM Plex Mono'},boxWidth:10,padding:10}},
+      plugins:{legend:{display:true,labels:{color:TK,font:{size:9,family:'JetBrains Mono'},boxWidth:10,padding:10}},
         tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${fmtE(c.raw)}`}}},
       scales:{
-        x:{grid:{display:false},ticks:{color:TK,font:{size:9,family:'IBM Plex Mono'}}},
-        y:{grid:{color:G},ticks:{color:TK,font:{size:9,family:'IBM Plex Mono'},callback:v=>'€'+(v/1000).toFixed(0)+'K'}}
+        x:{grid:{display:false},ticks:{color:TK,font:{size:9,family:'JetBrains Mono'}}},
+        y:{grid:{color:G},ticks:{color:TK,font:{size:9,family:'JetBrains Mono'},callback:v=>'€'+(v/1000).toFixed(0)+'K'}}
       }
     }
   });
