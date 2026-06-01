@@ -393,6 +393,20 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const sb = window.supabase.createClient(SB_URL, SB_KEY);
 const PENSION_PERSON = 'michiel';
 
+function parseDateLabel(s){
+  if(!s) return null;
+  const months = {jan:0,feb:1,mrt:2,mar:2,maa:2,apr:3,mei:4,may:4,
+                  jun:5,jul:6,aug:7,sep:8,okt:9,oct:9,nov:10,dec:11};
+  const m = s.toLowerCase().match(/([a-z]{3})/);
+  const y = s.match(/(\d{2,4})/);
+  if(!m || !y) return null;
+  const mo = months[m[1].slice(0,3)];
+  if(mo == null) return null;
+  let yy = parseInt(y[1]);
+  if(yy < 100) yy += 2000;
+  return new Date(yy, mo, 1);
+}
+
 let SALDO_DATA;
 
 async function loadSaldo(){
@@ -401,11 +415,11 @@ async function loadSaldo(){
       .from('bnd_account_balances')
       .select('iban, date_label, value_eur, created_at')
       .eq('person', PENSION_PERSON)
-      .eq('account_kind', 'pension')
-      .order('date_label', { ascending: true });
+      .eq('account_kind', 'pension');
     if (error) throw error;
     if (data && data.length) {
-      const dates = [...new Set(data.map(r => r.date_label))];
+      const dates = [...new Set(data.map(r => r.date_label))]
+        .sort((a, b) => parseDateLabel(a) - parseDateLabel(b));
       const saldi = {};
       for (const r of data) {
         if (!saldi[r.iban]) saldi[r.iban] = new Array(dates.length).fill(null);
